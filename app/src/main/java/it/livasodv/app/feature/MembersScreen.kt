@@ -22,6 +22,7 @@ import kotlinx.coroutines.launch
 fun MembersScreen() {
     val repo = AppGraph.repo
     val list by repo.members.collectAsState()
+    val clothing by repo.clothing.collectAsState()
     val role by repo.role.collectAsState()
     val canEdit = role == AppRole.DIRETTIVO
     var selected by remember { mutableStateOf<Member?>(null) }
@@ -86,7 +87,7 @@ fun MembersScreen() {
                 }
             }
             item {
-                val completed = list.count { m -> repo.clothing.value.any { it.memberId == m.id && it.assigned } }
+                val completed = list.count { m -> clothing.any { it.memberId == m.id && it.assigned } }
                 AppleCard(Modifier.padding(14.dp).fillMaxWidth()) {
                     Row(Modifier.padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
                         Icon(Icons.Default.Checkroom, null, tint = MaterialTheme.colorScheme.primary)
