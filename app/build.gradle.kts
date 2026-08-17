@@ -12,15 +12,23 @@ android {
         applicationId = "it.livasodv.app"
         minSdk = 26
         targetSdk = 36
-        versionCode = 237
-        versionName = "2.3.7-rc1-exact-gradle-813"
+        versionCode = 240
+        versionName = "2.4.0-rc1"
         buildConfigField("String", "SUPABASE_URL", "\"https://bgntmdjbrhabydfoobhr.supabase.co\"")
         buildConfigField("String", "SUPABASE_PUBLISHABLE_KEY", "\"sb_publishable_xBAOXhBDIay3f1pfhOdWeg_MII_Jsta\"")
     }
     buildFeatures { compose = true; buildConfig = true }
     compileOptions { sourceCompatibility = JavaVersion.VERSION_17; targetCompatibility = JavaVersion.VERSION_17 }
 }
-kotlin { compilerOptions { jvmTarget.set(JvmTarget.JVM_17) } }
+kotlin {
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_17)
+        freeCompilerArgs.addAll(
+            "-opt-in=androidx.compose.material3.ExperimentalMaterial3Api",
+            "-opt-in=io.github.jan.supabase.annotations.SupabaseExperimental"
+        )
+    }
+}
 dependencies {
     implementation(platform("androidx.compose:compose-bom:2026.06.00"))
     implementation("androidx.activity:activity-compose:1.13.0")

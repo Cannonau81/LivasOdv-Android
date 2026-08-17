@@ -277,6 +277,58 @@ class AppRepository {
         LocalManagementStore.log("Vestizione", "Salvataggio", value.itemName)
     }
 
+    suspend fun applyWardrobeTemplate(member: Member, existing: List<MemberClothing>) = mutate {
+        data class WardrobeBase(val name: String, val quantity: Int, val areas: Set<String>)
+        val template = listOf(
+            WardrobeBase("Maglietta", 2, setOf("118", "PC")),
+            WardrobeBase("Casacca 118", 1, setOf("118")),
+            WardrobeBase("Pantalone 118", 1, setOf("118")),
+            WardrobeBase("Felpa", 1, setOf("118", "PC")),
+            WardrobeBase("Scarpe", 1, setOf("118", "PC")),
+            WardrobeBase("Casco AIB", 1, setOf("AIB")),
+            WardrobeBase("Pantalone AIB", 1, setOf("AIB")),
+            WardrobeBase("Casacca AIB", 1, setOf("AIB")),
+            WardrobeBase("Scarpe AIB", 1, setOf("AIB")),
+            WardrobeBase("Occhiali AIB", 1, setOf("AIB")),
+            WardrobeBase("Fazzoletto", 1, setOf("118", "PC", "AIB")),
+            WardrobeBase("Maglietta AIB", 1, setOf("AIB")),
+            WardrobeBase("Maschera antifumo", 1, setOf("AIB")),
+            WardrobeBase("Chiavi della sede", 1, setOf("118", "PC", "AIB")),
+            WardrobeBase("Pantalone Prot. Civ.", 1, setOf("PC")),
+            WardrobeBase("Casacca Prot. Civ.", 1, setOf("PC")),
+            WardrobeBase("Maglietta Prot. Civ.", 1, setOf("PC")),
+            WardrobeBase("Felpa Prot. Civ.", 1, setOf("PC")),
+            WardrobeBase("Giubbotto Prot. Civ.", 1, setOf("PC")),
+            WardrobeBase("Scarpe Prot. Civ.", 1, setOf("PC")),
+            WardrobeBase("Smanicato tattico Prot. Civ.", 1, setOf("PC"))
+        )
+        fun eligible(areas: Set<String>): Boolean =
+            (member.enabled118 && "118" in areas) ||
+            (member.enabledPc && "PC" in areas) ||
+            (member.enabledAib && "AIB" in areas)
+
+        val byName = existing.associateBy { it.itemName.trim().lowercase() }
+        template.forEach { base ->
+            val old = byName[base.name.lowercase()]
+            val value = if (old == null) {
+                MemberClothing(
+                    id = newId(), memberId = member.id, itemName = base.name,
+                    area = base.areas.joinToString(","), targetQuantity = base.quantity,
+                    assigned = eligible(base.areas)
+                )
+            } else {
+                old.copy(
+                    area = base.areas.joinToString(","),
+                    targetQuantity = base.quantity,
+                    assigned = eligible(base.areas) || old.deliveredQuantity > 0
+                )
+            }
+            client.from("member_clothing").upsert(value)
+        }
+        _clothing.value = client.from("member_clothing").select().decodeList()
+        LocalManagementStore.log("Vestizione", "Template qualifiche", "${member.firstName} ${member.lastName}")
+    }
+
     suspend fun deleteClothing(id: String) = mutate {
         client.from("member_clothing").delete { filter { eq("id", id) } }
         _clothing.value = client.from("member_clothing").select().decodeList()

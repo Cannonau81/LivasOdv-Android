@@ -1,3 +1,5 @@
+@file:OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+
 package it.livasodv.app.feature
 
 import androidx.compose.foundation.clickable
@@ -194,7 +196,7 @@ private fun MemberDetailScreen(member: Member, onBack: () -> Unit, onEdit: (() -
                     if (canManage) item { OutlinedButton({ addCertification = true }, Modifier.padding(horizontal = 14.dp).fillMaxWidth()) { Icon(Icons.Default.Add, null); Text(" Aggiungi abilitazione/corso") } }
                 }
                 2 -> {
-                    if (canManage) item { FilledTonalButton(onClick = { scope.launch { applyWardrobeTemplate(member, myClothing) } }, modifier = Modifier.padding(horizontal = 14.dp).fillMaxWidth()) { Icon(Icons.Default.AutoAwesome, null); Text(" Genera vestizione dalle qualifiche") } }
+                    if (canManage) item { FilledTonalButton(onClick = { scope.launch { AppGraph.repo.applyWardrobeTemplate(member, myClothing) } }, modifier = Modifier.padding(horizontal = 14.dp).fillMaxWidth()) { Icon(Icons.Default.AutoAwesome, null); Text(" Genera vestizione dalle qualifiche") } }
                     if (myClothing.isEmpty()) item { EmptyState("Nessuna dotazione", "Le dotazioni assegnate al socio compariranno qui.") }
                     items(myClothing.sortedWith(compareBy({ it.area }, { it.itemName })), key = { it.id }) { x ->
                         AppleCard(Modifier.padding(horizontal = 14.dp).fillMaxWidth()) {

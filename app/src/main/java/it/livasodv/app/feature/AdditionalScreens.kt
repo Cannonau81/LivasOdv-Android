@@ -1,3 +1,5 @@
+@file:OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+
 package it.livasodv.app.feature
 
 import androidx.compose.foundation.clickable
@@ -33,7 +35,7 @@ fun ClothingScreen(onBack: () -> Unit) {
     val scope = rememberCoroutineScope()
     val selected = members.firstOrNull { it.id == selectedMember }
     val shown = remember(clothing, selectedMember, selectedArea) {
-        clothing.filter { (selectedMember == null || it.memberId == selectedMember) && (selectedArea == "Tutte" || it.area.equals(selectedArea, true)) }
+        clothing.filter { (selectedMember == null || it.memberId == selectedMember) && (selectedArea == "Tutte" || it.area.split(",").any { area -> area.trim().equals(selectedArea, true) }) }
             .sortedWith(compareBy({ it.area }, { it.itemName }))
     }
 

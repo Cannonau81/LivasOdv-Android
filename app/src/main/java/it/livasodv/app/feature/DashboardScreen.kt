@@ -1,3 +1,5 @@
+@file:OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+
 package it.livasodv.app.feature
 
 import androidx.compose.foundation.BorderStroke
@@ -41,7 +43,7 @@ fun DashboardScreen(role: AppRole, onRoute: (String) -> Unit) {
     }
     val newRequests = requests.count { it.status.equals("nuova", true) || !it.isRead }
     val operationalVehicles = vehicles.count { it.operational }
-    val recentRequests = requests.sortedByDescending { it.createdAt ?: it.requestedAt ?: "" }.take(3)
+    val recentRequests = requests.sortedByDescending { it.requestedAt ?: "" }.take(3)
 
     Scaffold(
         containerColor = LivasBackground,

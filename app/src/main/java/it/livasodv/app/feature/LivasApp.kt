@@ -1,3 +1,5 @@
+@file:OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+
 package it.livasodv.app.feature
 
 import androidx.compose.foundation.layout.Box
@@ -9,6 +11,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.unit.dp
 import it.livasodv.app.data.AppRole
 import it.livasodv.app.ui.theme.*
 import it.livasodv.app.data.AppGraph

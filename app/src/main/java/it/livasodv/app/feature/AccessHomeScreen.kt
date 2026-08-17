@@ -1,3 +1,5 @@
+@file:OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+
 package it.livasodv.app.feature
 
 import androidx.compose.foundation.Image
