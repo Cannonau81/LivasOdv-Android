@@ -1,6 +1,7 @@
 package it.livasodv.app.data
 
 import io.github.jan.supabase.auth.auth
+import io.github.jan.supabase.annotations.SupabaseExperimental
 import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.realtime.selectAsFlow
 import kotlinx.coroutines.coroutineScope
@@ -335,6 +336,7 @@ class AppRepository {
         _civilLeave.value = client.from("civil_leave_requests").select().decodeList()
     }
 
+    @OptIn(SupabaseExperimental::class)
     suspend fun observeRealtime() = coroutineScope {
         val r = _role.value
         launch { runCatching { client.from("members").selectAsFlow(Member::id).collect { _members.value = it } } }
