@@ -1,3 +1,5 @@
+@file:OptIn(io.github.jan.supabase.annotations.SupabaseExperimental::class)
+
 package it.livasodv.app.data
 
 import io.github.jan.supabase.auth.auth
