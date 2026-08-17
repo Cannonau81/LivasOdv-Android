@@ -1,0 +1,14 @@
+LIVAS ODV ANDROID - PACCHETTO UNICO COMPLETO 2.3.7
+
+Caricare il CONTENUTO di questa cartella nel repository GitHub.
+Non servono file aggiuntivi o sostituzioni manuali.
+
+Incluso:
+- .github/workflows/android-ci.yml
+- CI con Gradle 8.13 esatto
+- Gradle bootstrap 8.13
+- Android SDK 36
+- Fix Ktor DEX
+- Fix Supabase Realtime opt-in
+- test + lint + assembleDebug
+- upload APK come artifact GitHub Actions
