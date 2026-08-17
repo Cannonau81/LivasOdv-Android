@@ -1,4 +1,4 @@
-name: LivasODV Android 2.3.5 CI
+name: LivasODV Android 2.3.6 CI
 
 on:
   push:
@@ -32,11 +32,22 @@ jobs:
       - name: Verify workflow and Gradle Wrapper
         shell: bash
         run: |
-          echo "=== LivasODV Android 2.3.5 CI - NO GRADLE ACTION ==="
+          echo "=== LivasODV Android 2.3.6 CI - FORCE GRADLE 8.13 ==="
           echo "This workflow intentionally does NOT use gradle/actions/setup-gradle."
           chmod +x ./gradlew
           test -f gradle/wrapper/gradle-wrapper.properties
-          grep -q 'gradle-8.13-bin.zip' gradle/wrapper/gradle-wrapper.properties
+          echo "Forcing a single Gradle 8.13 distributionUrl..."
+          python3 - <<'PYFIX'
+          from pathlib import Path
+          p = Path("gradle/wrapper/gradle-wrapper.properties")
+          lines = [line for line in p.read_text().splitlines() if not line.startswith("distributionUrl=")]
+          lines.append(r"distributionUrl=https\://services.gradle.org/distributions/gradle-8.13-bin.zip")
+          p.write_text("\n".join(lines) + "\n")
+          PYFIX
+          echo "--- gradle-wrapper.properties ---"
+          cat gradle/wrapper/gradle-wrapper.properties
+          test "$(grep -c '^distributionUrl=' gradle/wrapper/gradle-wrapper.properties)" = "1"
+          grep -q '^distributionUrl=https\\://services.gradle.org/distributions/gradle-8.13-bin.zip$' gradle/wrapper/gradle-wrapper.properties
           ./gradlew --version
           GRADLE_VERSION="$(./gradlew --version | awk '/^Gradle / {print $2; exit}')"
           test "$GRADLE_VERSION" = "8.13"
@@ -64,7 +75,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: LivasODV-2.3.5-verification-reports
+          name: LivasODV-2.3.6-verification-reports
           if-no-files-found: ignore
           retention-days: 14
           path: |
@@ -75,7 +86,7 @@ jobs:
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: LivasODV-Android-2.3.5-RC-debug
+          name: LivasODV-Android-2.3.6-RC-debug
           if-no-files-found: error
           retention-days: 30
           path: app/build/outputs/apk/debug/*.apk
