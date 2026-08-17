@@ -12,8 +12,8 @@ android {
         applicationId = "it.livasodv.app"
         minSdk = 26
         targetSdk = 36
-        versionCode = 231
-        versionName = "2.3.0-rc1-ios-parity"
+        versionCode = 232
+        versionName = "2.3.2-rc1-ci-wrapper-fix"
         buildConfigField("String", "SUPABASE_URL", "\"https://bgntmdjbrhabydfoobhr.supabase.co\"")
         buildConfigField("String", "SUPABASE_PUBLISHABLE_KEY", "\"sb_publishable_xBAOXhBDIay3f1pfhOdWeg_MII_Jsta\"")
     }
