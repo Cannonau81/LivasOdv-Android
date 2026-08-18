@@ -40,12 +40,11 @@ fun roleAllowsArea(role: AppRole, area: AccessArea): Boolean = when (area) {
 
 private fun loginEmailFor(area: AccessArea, username: String): String? {
     val clean = username.trim().lowercase()
+    if (clean == "admin") return "livas.gonnos@tiscali.it"
     return when (area) {
-        AccessArea.DIRETTIVO -> if (clean == "admin") "livas.gonnos@tiscali.it" else null
+        AccessArea.DIRETTIVO -> null
         AccessArea.SOCI -> if (clean == "socio") "sannav@libero.it" else null
         AccessArea.SERVIZI_SOCIALI -> if (clean == "servizisociali") "servizisociali@livas.invalid" else null
-        // Queste aree non sono ancora esposte nella home pubblica Android.
-        // Quando avranno un account server dedicato verranno mappate qui senza mostrare email all'utente.
         AccessArea.MAGAZZINO, AccessArea.OLP, AccessArea.SERVIZIO_CIVILE -> null
     }
 }
@@ -152,7 +151,12 @@ fun LoginScreen(area: AccessArea, onBack: () -> Unit, onSuccess: () -> Unit) {
                                     error = if (e is IllegalArgumentException) {
                                         "Nome utente o password non corretti."
                                     } else {
-                                        "Accesso non riuscito: ${e.message ?: "controlla credenziali e connessione"}"
+                                        val msg = e.message.orEmpty().lowercase()
+                                        if ("invalid_credentials" in msg || "invalid login credentials" in msg) {
+                                            "Nome utente o password non corretti."
+                                        } else {
+                                            "Accesso non riuscito. Controlla credenziali e connessione e riprova."
+                                        }
                                     }
                                 } finally {
                                     loading = false
