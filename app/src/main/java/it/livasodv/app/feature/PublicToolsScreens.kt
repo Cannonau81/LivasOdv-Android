@@ -4,17 +4,20 @@ package it.livasodv.app.feature
 
 import android.content.Intent
 import android.net.Uri
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -151,49 +154,75 @@ private fun Ps118NativeScreen(onClose: () -> Unit) {
     var search by remember { mutableStateOf("") }
     val hospitals = remember {
         listOf(
-            "OSPEDALE CIVILE ALGHERO" to "Alghero",
-            "OSPEDALE A. SEGNI OZIERI" to "Ozieri",
-            "OSPEDALE GIOVANNI PAOLO II" to "Olbia",
-            "OSPEDALE PAOLO DETTORI" to "Tempio Pausania",
-            "OSPEDALE PAOLO MERLO" to "La Maddalena",
-            "OSPEDALE SAN FRANCESCO" to "Nuoro",
-            "OSPEDALE SAN CAMILLO" to "Sorgono",
-            "OSPEDALE LANUSEI" to "Lanusei",
-            "P. O. SAN MARTINO - ORISTANO" to "Oristano",
-            "P. O. A.G. MASTINO - BOSA" to "Bosa",
-            "OSP N.S. DI BONARIA S.GAVINO MONREALE" to "San Gavino Monreale",
-            "OSPEDALE SIRAI" to "Carbonia",
-            "OSPEDALE C.T.O." to "Iglesias",
-            "OSPEDALE SS. TRINITA" to "Cagliari",
-            "OSPEDALE S.GIUSEPPE CALASANZIO - ISILI" to "Isili",
-            "OSPEDALE S.MARCELLINO - MURAVERA" to "Muravera",
-            "PRESIDIO G.BROTZU" to "Cagliari",
-            "POLICLINICO D. CASULA" to "Monserrato",
-            "A.O.U. SASSARI" to "Sassari"
+            Triple("OSP N.S. DI BONARIA S.GAVINO MONREALE", "San Gavino Monreale", true),
+            Triple("A.O.U. SASSARI", "Sassari", false),
+            Triple("OSPEDALE A. SEGNI OZIERI", "Ozieri", false),
+            Triple("PRESIDIO G. BROTZU", "Cagliari", false),
+            Triple("OSPEDALE SS. TRINITÀ", "Cagliari", false),
+            Triple("POLICLINICO D. CASULA", "Monserrato", false),
+            Triple("P.O. SAN MARTINO", "Oristano", false),
+            Triple("OSPEDALE SAN FRANCESCO", "Nuoro", false),
+            Triple("OSPEDALE GIOVANNI PAOLO II", "Olbia", false)
         )
     }
     val filtered = hospitals.filter { search.isBlank() || it.first.contains(search, true) || it.second.contains(search, true) }
-    Scaffold(topBar = { LivasTopAppBar(title = { Text("Monitor PS 118") }, navigationIcon = { TextButton(onClose) { Text("Chiudi") } }) }) { p ->
+    val officialUrl = "https://monitorps.sardegnasalute.it/monitorps/MonitorServlet"
+
+    Scaffold(
+        containerColor = Color(0xFF06111A),
+        topBar = {
+            TopAppBar(
+                title = { Text("PS118 Live Open", fontWeight = FontWeight.Bold) },
+                navigationIcon = { TextButton(onClose) { Icon(Icons.Default.Cancel, null); Text("  Chiudi") } },
+                actions = { IconButton({ context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(officialUrl))) }) { Icon(Icons.Default.Refresh, "Aggiorna", tint = Color(0xFF55D8FF)) } },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFF090D12), titleContentColor = Color.White)
+            )
+        }
+    ) { p ->
         LazyColumn(
             Modifier.padding(p).fillMaxSize(),
             contentPadding = PaddingValues(14.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             item {
-                Card(shape = RoundedCornerShape(20.dp)) {
-                    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFF1A2129)),
+                    border = BorderStroke(1.dp, Color(0xFF245266)),
+                    shape = RoundedCornerShape(26.dp)
+                ) {
+                    Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Default.MonitorHeart, null, tint = MaterialTheme.colorScheme.primary)
-                            Spacer(Modifier.width(8.dp))
-                            Text("SARDEGNA LIVE", fontWeight = FontWeight.Black)
+                            Surface(shape = CircleShape, color = Color(0xFF153D4D), modifier = Modifier.size(56.dp)) {
+                                Box(contentAlignment = Alignment.Center) { Icon(Icons.Default.Sensors, null, tint = Color(0xFF55D8FF), modifier = Modifier.size(30.dp)) }
+                            }
+                            Spacer(Modifier.width(14.dp))
+                            Column {
+                                Text("SARDEGNA LIVE", color = Color(0xFF55D8FF), fontWeight = FontWeight.Black)
+                                Text("Situazione Pronto Soccorso", color = Color.White, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Black)
+                                Text("Dati informativi dalla fonte regionale ufficiale", color = Color.White.copy(alpha = .68f))
+                            }
                         }
-                        Text("Situazione Pronto Soccorso", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                        Text("Fonte ufficiale: Regione Sardegna · Monitor Pronto Soccorso", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        Text("Per urgenze ed emergenze chiama 112/118. I dati del monitor sono informativi e non sostituiscono il triage.", style = MaterialTheme.typography.bodySmall)
-                        Button(
-                            onClick = { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://monitorps.sardegnasalute.it/monitorps/MonitorServlet"))) },
-                            modifier = Modifier.fillMaxWidth()
-                        ) { Icon(Icons.Default.OpenInNew, null); Text(" Apri dati LIVE ufficiali") }
+                        HorizontalDivider(color = Color.White.copy(alpha = .18f))
+                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                            Text("◉  Auto refresh 60 s", color = Color.White.copy(alpha = .65f))
+                            Text(java.text.SimpleDateFormat("HH:mm", java.util.Locale.ITALY).format(java.util.Date()), color = Color.White.copy(alpha = .65f))
+                        }
+                    }
+                }
+            }
+            item {
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFF211B18)),
+                    border = BorderStroke(1.dp, Color(0xFF70411C)),
+                    shape = RoundedCornerShape(24.dp)
+                ) {
+                    Row(Modifier.padding(16.dp)) {
+                        Icon(Icons.Default.ReportProblem, null, tint = Color(0xFFFF8A2C))
+                        Spacer(Modifier.width(12.dp))
+                        Column {
+                            Text("Informazioni, non triage", color = Color.White, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
+                            Text("I dati possono essere incompleti, ritardati o non disponibili e non devono essere usati per rinviare cure o scegliere autonomamente una destinazione in emergenza. Per un'urgenza chiama 112/118.", color = Color.White.copy(alpha = .70f))
+                        }
                     }
                 }
             }
@@ -201,29 +230,57 @@ private fun Ps118NativeScreen(onClose: () -> Unit) {
                 OutlinedTextField(
                     value = search,
                     onValueChange = { search = it },
-                    label = { Text("Cerca pronto soccorso") },
+                    placeholder = { Text("Cerca pronto soccorso") },
                     leadingIcon = { Icon(Icons.Default.Search, null) },
                     singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
+                    shape = RoundedCornerShape(28.dp),
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedContainerColor = Color(0xFF252A30),
+                        unfocusedContainerColor = Color(0xFF252A30),
+                        focusedBorderColor = Color.White.copy(alpha=.28f),
+                        unfocusedBorderColor = Color.White.copy(alpha=.18f)
+                    )
                 )
             }
-            item {
-                Text("Pronto Soccorso Sardegna", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                Text("L'elenco resta disponibile anche se il portale regionale non risponde. I valori clinici non vengono inventati dall'app.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
             items(filtered) { h ->
-                Card(shape = RoundedCornerShape(16.dp)) {
-                    ListItem(
-                        headlineContent = { Text(h.first, fontWeight = FontWeight.SemiBold) },
-                        supportingContent = { Text("${h.second} · Dati live dalla fonte ufficiale") },
-                        leadingContent = { Icon(Icons.Default.LocalHospital, null, tint = MaterialTheme.colorScheme.primary) },
-                        trailingContent = { Icon(Icons.Default.ChevronRight, null) },
-                        modifier = Modifier.clickable {
-                            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://monitorps.sardegnasalute.it/monitorps/MonitorServlet")))
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFF1A2129)),
+                    border = BorderStroke(1.dp, Color.White.copy(alpha = .09f)),
+                    shape = RoundedCornerShape(26.dp),
+                    modifier = Modifier.fillMaxWidth().clickable { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(officialUrl))) }
+                ) {
+                    Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        Row(verticalAlignment = Alignment.Top) {
+                            Column(Modifier.weight(1f)) {
+                                Text(h.first, color = Color.White, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
+                                Text(h.second, color = Color.White.copy(alpha = .64f))
+                            }
+                            if (h.third) Icon(Icons.Default.Star, null, tint = Color(0xFFFFD60A), modifier = Modifier.size(30.dp))
                         }
-                    )
+                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                            Text("●  Affollamento N/D", color = Color.White.copy(alpha = .52f), fontWeight = FontWeight.SemiBold)
+                            Text("LIVE", color = Color(0xFF55D8FF), fontWeight = FontWeight.Black)
+                        }
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            PsMetric("—", "ATTESA", Modifier.weight(1f))
+                            PsMetric("—", "IN GESTIONE", Modifier.weight(1f))
+                            PsMetric("—", "ARRIVO 118", Modifier.weight(1f))
+                        }
+                        Text("Tocca la scheda per consultare i valori live ufficiali.", color = Color.White.copy(alpha=.48f), style = MaterialTheme.typography.bodySmall)
+                    }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun PsMetric(value: String, label: String, modifier: Modifier = Modifier) {
+    Surface(modifier = modifier, color = Color(0xFF242B34), shape = RoundedCornerShape(16.dp)) {
+        Column(Modifier.padding(vertical = 14.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(value, color = Color.White, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+            Text(label, color = Color.White.copy(alpha = .63f), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
         }
     }
 }

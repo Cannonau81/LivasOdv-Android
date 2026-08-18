@@ -76,13 +76,34 @@ private fun ProtectedAreaShell(area: AccessArea, onLoggedOut: () -> Unit) {
 
     Scaffold(
         topBar = {
-            if (error != null || loading) {
-                Surface(tonalElevation = 2.dp) {
-                    ListItem(
-                        headlineContent = { Text(if (loading) "Sincronizzazione server…" else error ?: "") },
-                        leadingContent = { if (loading) CircularProgressIndicator(strokeWidth = 2.dp) else Icon(Icons.Default.CloudOff, null) },
-                        trailingContent = if (error != null) { { IconButton({ repo.clearError() }) { Icon(Icons.Default.Close, "Chiudi") } } } else null
-                    )
+            Column {
+                if (effectiveArea == AccessArea.DIRETTIVO && unreadRequests > 0) {
+                    Surface(
+                        color = Color(0xFF2A1111),
+                        tonalElevation = 0.dp,
+                        onClick = { navigate("requests") }
+                    ) {
+                        ListItem(
+                            colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                            headlineContent = { Text("$unreadRequests ${if (unreadRequests == 1) "nuova richiesta cittadino" else "nuove richieste cittadini"}", color = Color.White) },
+                            supportingContent = { Text("Tocca per aprire e gestire", color = LivasMuted) },
+                            leadingContent = {
+                                BadgedBox(badge = { Badge(containerColor = LivasRed) { Text(unreadRequests.coerceAtMost(99).toString()) } }) {
+                                    Icon(Icons.Default.NotificationsActive, null, tint = LivasRed)
+                                }
+                            },
+                            trailingContent = { Icon(Icons.Default.ChevronRight, null, tint = LivasMuted) }
+                        )
+                    }
+                }
+                if (error != null || loading) {
+                    Surface(tonalElevation = 2.dp) {
+                        ListItem(
+                            headlineContent = { Text(if (loading) "Sincronizzazione server…" else error ?: "") },
+                            leadingContent = { if (loading) CircularProgressIndicator(strokeWidth = 2.dp) else Icon(Icons.Default.CloudOff, null) },
+                            trailingContent = if (error != null) { { IconButton({ repo.clearError() }) { Icon(Icons.Default.Close, "Chiudi") } } } else null
+                        )
+                    }
                 }
             }
         },
@@ -102,8 +123,9 @@ private fun ProtectedAreaShell(area: AccessArea, onLoggedOut: () -> Unit) {
                         icon = {
                             BadgedBox(
                                 badge = {
-                                    if (effectiveArea == AccessArea.DIRETTIVO && t.id == "admin_home" && unreadRequests > 0) {
-                                        Badge { Text(unreadRequests.coerceAtMost(99).toString()) }
+                                    if ((effectiveArea == AccessArea.DIRETTIVO && t.id == "admin_home" && unreadRequests > 0) ||
+                                        (effectiveArea == AccessArea.SERVIZI_SOCIALI && t.id == "requests" && unreadRequests > 0)) {
+                                        Badge(containerColor = LivasRed) { Text(unreadRequests.coerceAtMost(99).toString()) }
                                     }
                                 }
                             ) { Icon(t.icon, t.label) }

@@ -110,15 +110,15 @@ fun LoginScreen(area: AccessArea, onBack: () -> Unit, onSuccess: () -> Unit) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Image(painterResource(R.drawable.livas_official_logo), "Logo Lì.v.a.s.", Modifier.size(175.dp))
+            Image(painterResource(R.drawable.livas_official_logo), "Logo Lì.v.a.s.", Modifier.size(190.dp))
             Spacer(Modifier.height(14.dp))
-            Text("Accesso ${area.title}", color = Color.White, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Black)
-            Text("Lì.v.a.s. O.d.V. · Gonnosfanadiga", color = LivasMuted, style = MaterialTheme.typography.bodySmall)
+            Text("Accesso ${area.title}", color = Color.White, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Black)
+            Text("Lì.v.a.s. O.d.V. · Gonnosfanadiga", color = Color.White.copy(alpha = .72f), style = MaterialTheme.typography.bodyMedium)
             Spacer(Modifier.height(22.dp))
             Card(
-                colors = CardDefaults.cardColors(containerColor = LivasSurface),
-                shape = RoundedCornerShape(18.dp),
-                border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.10f)),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFF2A3038).copy(alpha = .92f)),
+                shape = RoundedCornerShape(24.dp),
+                border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.24f)),
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
             ) {
                 Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -215,7 +215,7 @@ fun LoginScreen(area: AccessArea, onBack: () -> Unit, onSuccess: () -> Unit) {
                             }
                         },
                         enabled = !loading && username.isNotBlank() && pass.isNotBlank(),
-                        modifier = Modifier.fillMaxWidth().height(50.dp),
+                        modifier = Modifier.fillMaxWidth().height(56.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = LivasRed)
                     ) { Text(if (loading) "ACCESSO…" else "ACCEDI", fontWeight = FontWeight.Bold) }
                 }

@@ -1,0 +1,6 @@
+LivasODV Android 2.4.7
+- PS118 ridisegnato come schermata nativa in stile iPhone (no WebView incorporata)
+- banner e badge richieste cittadini non lette nel Direttivo
+- badge Richieste in Servizi Sociali
+- login e card ulteriormente allineati alla grafica Apple Build 31
+- mantenuti i fix 2.4.6 e la base Supabase
