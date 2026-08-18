@@ -34,8 +34,8 @@ fun LivasTopAppBar(
         actions = actions,
         scrollBehavior = scrollBehavior,
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = LivasNavy,
-            scrolledContainerColor = LivasNavy,
+            containerColor = LivasBackgroundDeep,
+            scrolledContainerColor = LivasSurfaceStrong,
             titleContentColor = Color.White,
             navigationIconContentColor = Color.White,
             actionIconContentColor = Color.White
@@ -47,9 +47,10 @@ fun LivasTopAppBar(
 fun AppleCard(modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) {
     Card(
         modifier = modifier,
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = LivasSurface),
+        border = androidx.compose.foundation.BorderStroke(1.dp, LivasLine),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         content = content
     )
 }

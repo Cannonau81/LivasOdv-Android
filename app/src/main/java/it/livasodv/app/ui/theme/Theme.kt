@@ -1,28 +1,34 @@
 package it.livasodv.app.ui.theme
 
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.lightColorScheme
+import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
-val LivasNavy = Color(0xFF073A88)
-val LivasNavyDark = Color(0xFF052A63)
-val LivasBackground = Color(0xFFF6F7FA)
-val LivasSurface = Color(0xFFFFFFFF)
-val LivasSurfaceStrong = Color(0xFFF0F3F8)
-val LivasLine = Color(0xFFD9DEE8)
-val LivasRed = Color(0xFFD71920)
-val LivasOrange = Color(0xFFF28C18)
-val LivasGreen = Color(0xFF159447)
-val LivasBlue = Color(0xFF0B63CE)
-val LivasPurple = Color(0xFF7247C8)
-val LivasText = Color(0xFF111827)
-val LivasMuted = Color(0xFF6B7280)
+// Palette ricavata direttamente da ProfessionalTheme.swift / RootView.swift (Build Apple 31).
+val LivasBackground = Color(0xFF090C0F)       // Color(0.035, 0.045, 0.060)
+val LivasBackgroundDeep = Color(0xFF05070D)   // WowGlowBackground top
+val LivasSurface = Color(0xFF17191D)          // white ~5.5% sopra il fondo scuro
+val LivasSurfaceStrong = Color(0xFF202329)    // white ~8.5%
+val LivasLine = Color(0xFF2A2C31)             // white ~10%
+val LivasAccent = Color(0xFFD11C14)           // Color(0.82, 0.11, 0.08)
+val LivasWarmAccent = Color(0xFFF25C1F)       // Color(0.95, 0.36, 0.12)
 
-private val Scheme = lightColorScheme(
-    primary = LivasNavy,
+// Alias mantenuti per compatibilità con le schermate esistenti.
+val LivasNavy = LivasAccent
+val LivasNavyDark = Color(0xFF7A0004)
+val LivasRed = LivasAccent
+val LivasOrange = LivasWarmAccent
+val LivasGreen = Color(0xFF30D158)
+val LivasBlue = Color(0xFF0A84FF)
+val LivasPurple = Color(0xFFBF5AF2)
+val LivasText = Color(0xFFF5F5F7)
+val LivasMuted = Color(0xFF91949B)
+
+private val Scheme = darkColorScheme(
+    primary = LivasAccent,
     onPrimary = Color.White,
-    secondary = LivasBlue,
+    secondary = LivasWarmAccent,
     onSecondary = Color.White,
     tertiary = LivasGreen,
     background = LivasBackground,
@@ -30,9 +36,9 @@ private val Scheme = lightColorScheme(
     surface = LivasSurface,
     onSurface = LivasText,
     surfaceVariant = LivasSurfaceStrong,
-    onSurfaceVariant = Color(0xFF4B5563),
+    onSurfaceVariant = Color(0xFFC7C8CC),
     outline = LivasLine,
-    error = LivasRed,
+    error = Color(0xFFFF453A),
     onError = Color.White
 )
 

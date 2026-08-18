@@ -101,7 +101,7 @@ fun DashboardScreen(role: AppRole, onRoute: (String) -> Unit) {
 
             if (recentRequests.isEmpty()) {
                 item {
-                    Card(colors = CardDefaults.cardColors(containerColor = Color.White), border = BorderStroke(1.dp, LivasLine), shape = RoundedCornerShape(16.dp)) {
+                    Card(colors = CardDefaults.cardColors(containerColor = LivasSurface), border = BorderStroke(1.dp, LivasLine), shape = RoundedCornerShape(16.dp)) {
                         Text("Nessuna nuova richiesta.", Modifier.padding(18.dp), color = LivasMuted)
                     }
                 }
@@ -110,12 +110,12 @@ fun DashboardScreen(role: AppRole, onRoute: (String) -> Unit) {
                     val r = recentRequests[index]
                     Card(
                         modifier = Modifier.fillMaxWidth().clickable { onRoute("requests") },
-                        colors = CardDefaults.cardColors(containerColor = Color.White),
+                        colors = CardDefaults.cardColors(containerColor = LivasSurface),
                         border = BorderStroke(1.dp, LivasLine),
                         shape = RoundedCornerShape(16.dp)
                     ) {
                         Row(Modifier.padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
-                            Surface(shape = CircleShape, color = Color(0xFFFFEBEE), modifier = Modifier.size(36.dp)) {
+                            Surface(shape = CircleShape, color = LivasRed.copy(alpha = 0.15f), modifier = Modifier.size(36.dp)) {
                                 Box(contentAlignment = Alignment.Center) { Icon(Icons.Default.MedicalServices, null, tint = LivasRed, modifier = Modifier.size(20.dp)) }
                             }
                             Spacer(Modifier.width(12.dp))
@@ -125,7 +125,7 @@ fun DashboardScreen(role: AppRole, onRoute: (String) -> Unit) {
                                 val route = listOfNotNull(r.fromPlace, r.toPlace).joinToString(" → ")
                                 if (route.isNotBlank()) Text(route, style = MaterialTheme.typography.bodySmall, color = LivasMuted)
                             }
-                            Surface(shape = RoundedCornerShape(8.dp), color = Color(0xFFFFD75E)) {
+                            Surface(shape = RoundedCornerShape(8.dp), color = LivasWarmAccent.copy(alpha = 0.88f)) {
                                 Text(r.status.uppercase(), Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black)
                             }
                         }
@@ -156,7 +156,7 @@ private fun AppleMetricCard(
 ) {
     Card(
         modifier = modifier.height(128.dp).clickable(onClick = onClick),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = LivasSurface),
         border = BorderStroke(1.dp, LivasLine),
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)

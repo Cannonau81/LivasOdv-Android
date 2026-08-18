@@ -44,6 +44,12 @@ class AppRepository {
     private val _vehicleMonthlyKm = MutableStateFlow<List<VehicleMonthlyKm>>(emptyList()); val vehicleMonthlyKm = _vehicleMonthlyKm.asStateFlow()
 
     fun clearError() { _error.value = null }
+    fun enterLocalMode(role: AppRole) {
+        _role.value = role
+        _profile.value = null
+        _error.value = null
+        _loading.value = false
+    }
     fun newId() = UUID.randomUUID().toString()
     fun currentUserId(): String? = client.auth.currentUserOrNull()?.id
 

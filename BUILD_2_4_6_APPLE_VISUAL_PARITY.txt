@@ -1,0 +1,17 @@
+LI.V.A.S. O.D.V. Android 2.4.6
+APPLE BUILD 31 VISUAL PARITY PASS
+
+Riferimento vincolante: iOS Build 31.
+- Palette interna derivata da ProfessionalTheme.swift.
+- Home derivata da WelcomeAccessView / MockupAccessTile.
+- Stesso ordine delle aree e icone semanticamente equivalenti.
+- Background nero/rosso, tile 4 colonne, bordo rosso, simboli rossi 3D, logo 3D 325.
+- Login portato allo stile nero/rosso Apple.
+- Top bar e bottom navigation portate alla palette scura Apple.
+- Dashboard e card principali portate alle surface scure Apple.
+- Asset PC Nazionale aggiunto direttamente dalla Build Apple 31.
+- Login 2.4.5, PS118 nativo e Protezione Civile nativa preservati.
+
+NOTA VALIDAZIONE
+Il preflight locale passa. La compilazione completa APK resta demandata a GitHub Actions,
+che usa Gradle 8.13/JDK17/SDK36 come nella base verde precedente.

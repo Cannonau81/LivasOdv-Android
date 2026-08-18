@@ -4,8 +4,6 @@ package it.livasodv.app.feature
 
 import android.content.Intent
 import android.net.Uri
-import android.webkit.WebView
-import android.webkit.WebViewClient
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
@@ -21,7 +19,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
 import kotlinx.coroutines.delay
 import kotlin.random.Random
 
@@ -31,7 +28,7 @@ fun PublicToolScreen(route: String, onClose: () -> Unit) {
         "about" -> AboutPublicScreen(onClose)
         "contacts" -> ContactsPublicScreen(onClose)
         "emergency" -> EmergencyHelpScreen(onClose)
-        "ps118" -> OfficialWebScreen("Monitor PS 118", "https://monitorps.sardegnasalute.it/monitorps/", onClose)
+        "ps118" -> Ps118NativeScreen(onClose)
         "civil_protection" -> CivilProtectionScreen(onClose)
         "rescue_run" -> RescueRunScreen(onClose)
         else -> onClose()
@@ -149,13 +146,85 @@ private fun EmergencyCallButton(number: String, modifier: Modifier, onClick: () 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun OfficialWebScreen(title: String, url: String, onClose: () -> Unit) {
-    Scaffold(topBar = { LivasTopAppBar(title = { Text(title) }, navigationIcon = { TextButton(onClose) { Text("Chiudi") } }) }) { p ->
-        AndroidView(
-            modifier = Modifier.padding(p).fillMaxSize(),
-            factory = { context -> WebView(context).apply { settings.javaScriptEnabled = true; webViewClient = WebViewClient(); loadUrl(url) } },
-            update = { if (it.url == null) it.loadUrl(url) }
+private fun Ps118NativeScreen(onClose: () -> Unit) {
+    val context = LocalContext.current
+    var search by remember { mutableStateOf("") }
+    val hospitals = remember {
+        listOf(
+            "OSPEDALE CIVILE ALGHERO" to "Alghero",
+            "OSPEDALE A. SEGNI OZIERI" to "Ozieri",
+            "OSPEDALE GIOVANNI PAOLO II" to "Olbia",
+            "OSPEDALE PAOLO DETTORI" to "Tempio Pausania",
+            "OSPEDALE PAOLO MERLO" to "La Maddalena",
+            "OSPEDALE SAN FRANCESCO" to "Nuoro",
+            "OSPEDALE SAN CAMILLO" to "Sorgono",
+            "OSPEDALE LANUSEI" to "Lanusei",
+            "P. O. SAN MARTINO - ORISTANO" to "Oristano",
+            "P. O. A.G. MASTINO - BOSA" to "Bosa",
+            "OSP N.S. DI BONARIA S.GAVINO MONREALE" to "San Gavino Monreale",
+            "OSPEDALE SIRAI" to "Carbonia",
+            "OSPEDALE C.T.O." to "Iglesias",
+            "OSPEDALE SS. TRINITA" to "Cagliari",
+            "OSPEDALE S.GIUSEPPE CALASANZIO - ISILI" to "Isili",
+            "OSPEDALE S.MARCELLINO - MURAVERA" to "Muravera",
+            "PRESIDIO G.BROTZU" to "Cagliari",
+            "POLICLINICO D. CASULA" to "Monserrato",
+            "A.O.U. SASSARI" to "Sassari"
         )
+    }
+    val filtered = hospitals.filter { search.isBlank() || it.first.contains(search, true) || it.second.contains(search, true) }
+    Scaffold(topBar = { LivasTopAppBar(title = { Text("Monitor PS 118") }, navigationIcon = { TextButton(onClose) { Text("Chiudi") } }) }) { p ->
+        LazyColumn(
+            Modifier.padding(p).fillMaxSize(),
+            contentPadding = PaddingValues(14.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            item {
+                Card(shape = RoundedCornerShape(20.dp)) {
+                    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(Icons.Default.MonitorHeart, null, tint = MaterialTheme.colorScheme.primary)
+                            Spacer(Modifier.width(8.dp))
+                            Text("SARDEGNA LIVE", fontWeight = FontWeight.Black)
+                        }
+                        Text("Situazione Pronto Soccorso", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                        Text("Fonte ufficiale: Regione Sardegna · Monitor Pronto Soccorso", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text("Per urgenze ed emergenze chiama 112/118. I dati del monitor sono informativi e non sostituiscono il triage.", style = MaterialTheme.typography.bodySmall)
+                        Button(
+                            onClick = { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://monitorps.sardegnasalute.it/monitorps/MonitorServlet"))) },
+                            modifier = Modifier.fillMaxWidth()
+                        ) { Icon(Icons.Default.OpenInNew, null); Text(" Apri dati LIVE ufficiali") }
+                    }
+                }
+            }
+            item {
+                OutlinedTextField(
+                    value = search,
+                    onValueChange = { search = it },
+                    label = { Text("Cerca pronto soccorso") },
+                    leadingIcon = { Icon(Icons.Default.Search, null) },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+            item {
+                Text("Pronto Soccorso Sardegna", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                Text("L'elenco resta disponibile anche se il portale regionale non risponde. I valori clinici non vengono inventati dall'app.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            items(filtered) { h ->
+                Card(shape = RoundedCornerShape(16.dp)) {
+                    ListItem(
+                        headlineContent = { Text(h.first, fontWeight = FontWeight.SemiBold) },
+                        supportingContent = { Text("${h.second} · Dati live dalla fonte ufficiale") },
+                        leadingContent = { Icon(Icons.Default.LocalHospital, null, tint = MaterialTheme.colorScheme.primary) },
+                        trailingContent = { Icon(Icons.Default.ChevronRight, null) },
+                        modifier = Modifier.clickable {
+                            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://monitorps.sardegnasalute.it/monitorps/MonitorServlet")))
+                        }
+                    )
+                }
+            }
+        }
     }
 }
 
@@ -164,23 +233,26 @@ private fun OfficialWebScreen(title: String, url: String, onClose: () -> Unit) {
 private fun CivilProtectionScreen(onClose: () -> Unit) {
     var selected by remember { mutableIntStateOf(0) }
     val tabs = listOf("Allerte", "Meteo", "Incendi", "Cosa fare", "Numeri")
-    val urls = listOf(
-        "https://www.sardegnaambiente.it/protezionecivile/",
-        "https://www.sardegnaambiente.it/index.php?c=7092&nodesc=1&s=20&v=9&xsl=2273",
-        "https://www.sardegnaambiente.it/index.php?c=7093&nodesc=1&s=20&v=9&xsl=2273"
-    )
     val context = LocalContext.current
+    fun openOfficial(url: String) = context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+
     Scaffold(topBar = { LivasTopAppBar(title = { Text("Protezione Civile") }, navigationIcon = { TextButton(onClose) { Text("Chiudi") } }) }) { p ->
         Column(Modifier.padding(p).fillMaxSize()) {
             Row(Modifier.fillMaxWidth().horizontalScroll(androidx.compose.foundation.rememberScrollState()).padding(8.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 tabs.forEachIndexed { index, label -> FilterChip(selected == index, { selected = index }, { Text(label) }) }
             }
             when (selected) {
-                0,1,2 -> AndroidView(
-                    modifier = Modifier.fillMaxSize(),
-                    factory = { c -> WebView(c).apply { settings.javaScriptEnabled = true; webViewClient = WebViewClient(); loadUrl(urls[selected]) } },
-                    update = { view -> if (view.url != urls[selected]) view.loadUrl(urls[selected]) }
-                )
+                0 -> LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(14.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    item { OfficialSourceCard("Allerte regionali", "Avvisi di criticità, rischio idrogeologico e comunicazioni ufficiali della Protezione Civile Sardegna.", Icons.Default.Warning) { openOfficial("https://sardegnaambiente.it/protezionecivile/") } }
+                    item { OfficialSourceCard("Bollettino di criticità regionale", "Consulta il bollettino del Centro Funzionale Decentrato.", Icons.Default.Water) { openOfficial("https://sardegnaambiente.it/index.php?c=12836&nodesc=1&s=20&v=9&xsl=2273") } }
+                    item { Text("L'app non genera né modifica i livelli di allerta: fa sempre fede la fonte ufficiale regionale.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+                }
+                1 -> LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(14.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    item { OfficialSourceCard("Meteo e rischio idrogeologico", "Bollettini di vigilanza meteo, criticità e avvisi di condizioni meteorologiche avverse.", Icons.Default.Thunderstorm) { openOfficial("https://sardegnaambiente.it/index.php?c=7092&nodesc=1&s=20&v=9&xsl=2273") } }
+                }
+                2 -> LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(14.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    item { OfficialSourceCard("Pericolo incendi", "Bollettino regionale giornaliero di previsione del pericolo incendio.", Icons.Default.LocalFireDepartment) { openOfficial("https://sardegnaambiente.it/index.php?c=7093&nodesc=1&s=20&v=9&xsl=2273") } }
+                }
                 3 -> LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     item { HelpCard("In caso di allerta", Icons.Default.Warning) {
                         HelpStep("1", "Informati", "Consulta gli avvisi ufficiali di Protezione Civile e Comune.")
@@ -188,13 +260,28 @@ private fun CivilProtectionScreen(onClose: () -> Unit) {
                         HelpStep("3", "Incendi", "Non avvicinarti al fronte di fuoco; lascia libere le vie ai mezzi di soccorso e segnala subito fumo o fiamme.")
                         HelpStep("4", "Emergenza", "Per pericolo immediato chiama il 112 e segui le indicazioni delle autorità.")
                     } }
-                    item { Text("Le indicazioni in app sono un promemoria. Gli avvisi e le disposizioni ufficiali hanno sempre priorità.", style = MaterialTheme.typography.bodySmall) }
+                    item { Text("Le disposizioni ufficiali hanno sempre priorità sulle indicazioni presenti nell'app.", style = MaterialTheme.typography.bodySmall) }
                 }
                 4 -> LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(14.dp)) {
                     val nums = listOf("Numero Unico Emergenze" to "112", "Vigili del Fuoco" to "115", "Emergenza sanitaria" to "118", "Li.v.a.s. O.D.V." to "0709798990")
                     items(nums) { n -> ListItem(modifier = Modifier.clickable { context.startActivity(Intent(Intent.ACTION_DIAL, Uri.parse("tel:${n.second}"))) }, headlineContent = { Text(n.first, fontWeight = FontWeight.Bold) }, supportingContent = { Text(n.second) }, leadingContent = { Icon(Icons.Default.Phone, null) }, trailingContent = { Icon(Icons.Default.ChevronRight, null) }); HorizontalDivider() }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun OfficialSourceCard(title: String, subtitle: String, icon: androidx.compose.ui.graphics.vector.ImageVector, onOpen: () -> Unit) {
+    Card(shape = RoundedCornerShape(18.dp)) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(9.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(icon, null, tint = MaterialTheme.colorScheme.primary)
+                Spacer(Modifier.width(9.dp))
+                Text(title, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
+            }
+            Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Button(onOpen, modifier = Modifier.fillMaxWidth()) { Icon(Icons.Default.OpenInNew, null); Text(" Apri fonte ufficiale") }
         }
     }
 }

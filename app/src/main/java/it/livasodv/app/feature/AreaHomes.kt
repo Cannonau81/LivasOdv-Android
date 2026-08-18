@@ -218,7 +218,7 @@ private fun HeaderBlock(icon: ImageVector, title: String, subtitle: String) {
 
 @Composable
 private fun MiniMetric(title: String, value: Int, subtitle: String, modifier: Modifier = Modifier) {
-    Card(modifier, colors = CardDefaults.cardColors(containerColor = Color.White), shape = RoundedCornerShape(16.dp)) { Column(Modifier.padding(14.dp)) { Text("$value", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Black); Text(title, fontWeight = FontWeight.Bold); Text(subtitle, style = MaterialTheme.typography.labelSmall, color = LivasMuted) } }
+    Card(modifier, colors = CardDefaults.cardColors(containerColor = LivasSurface), shape = RoundedCornerShape(16.dp)) { Column(Modifier.padding(14.dp)) { Text("$value", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Black); Text(title, fontWeight = FontWeight.Bold); Text(subtitle, style = MaterialTheme.typography.labelSmall, color = LivasMuted) } }
 }
 
 @Composable

@@ -1,0 +1,9 @@
+LI.V.A.S. O.D.V. Android 2.4.5
+
+- Login locali allineati alla Build Apple 31: admin, socio, magazzino, OLP e Apple Review verificati tramite SHA-256.
+- Le credenziali locali corrette non vengono piu rifiutate da Supabase.
+- La sincronizzazione Supabase viene tentata separatamente dove esiste un account server equivalente e non blocca l'accesso locale.
+- Servizi Sociali mantiene autenticazione server dedicata.
+- Monitor PS 118 trasformato in schermata nativa con elenco PS Sardegna e accesso esplicito alla fonte regionale live.
+- Protezione Civile trasformata in schermata nativa; rimossa la WebView che restituiva ERR_EMPTY_RESPONSE.
+- Collegamenti aggiornati alle fonti ufficiali SardegnaAmbiente per allerte, meteo e incendi.

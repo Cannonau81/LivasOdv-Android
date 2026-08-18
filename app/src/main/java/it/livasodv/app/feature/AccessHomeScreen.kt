@@ -2,6 +2,7 @@
 
 package it.livasodv.app.feature
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -9,6 +10,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -26,7 +28,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import it.livasodv.app.R
-
 
 enum class AccessArea(val title: String) {
     DIRETTIVO("Direttivo"),
@@ -52,6 +53,7 @@ fun AccessHomeScreen(
     onCitizenArea: () -> Unit,
     onPublicTool: (String) -> Unit
 ) {
+    // Stessa sequenza e stesse icone semantiche di WelcomeAccessView (iOS Build 31).
     val tiles = listOf(
         AppleAccessTile("DIRETTIVO", "Gestione", Icons.Default.Groups, protectedArea = AccessArea.DIRETTIVO),
         AppleAccessTile("SOCI", "Turni e servizi", Icons.Default.Group, protectedArea = AccessArea.SOCI),
@@ -59,7 +61,7 @@ fun AccessHomeScreen(
         AppleAccessTile("SERVIZI SOCIALI", "Richieste", Icons.Default.MedicalServices, protectedArea = AccessArea.SERVIZI_SOCIALI),
         AppleAccessTile("S.C. • OLP", "Gestione", Icons.Default.School, protectedArea = AccessArea.OLP),
         AppleAccessTile("S.C. OPERATORI", "Turni e corsi", Icons.Default.Badge, protectedArea = AccessArea.SERVIZIO_CIVILE),
-        AppleAccessTile("CITTADINI", "Richieste", Icons.Default.Person, citizen = true),
+        AppleAccessTile("CITTADINI", "Richieste", Icons.Default.WavingHand, citizen = true),
         AppleAccessTile("EMERGENZE", "FAQ e primo soccorso", Icons.Default.Phone, publicRoute = "emergency"),
         AppleAccessTile("PASSATEMPO", "Rescue Run", Icons.Default.SportsEsports, publicRoute = "rescue_run"),
         AppleAccessTile("MONITOR PS 118", "Pronto Soccorso Sardegna", Icons.Default.MonitorHeart, publicRoute = "ps118"),
@@ -69,46 +71,51 @@ fun AccessHomeScreen(
     Box(
         Modifier.fillMaxSize().background(
             Brush.verticalGradient(
-                listOf(Color.Black, Color(0xFF0E0204), Color.Black)
+                listOf(
+                    Color.Black,
+                    Color(0xFF0E0203), // iOS: red 0.055 / green 0.006 / blue 0.012
+                    Color.Black
+                )
             )
         )
     ) {
         Column(
             Modifier.fillMaxSize()
                 .windowInsetsPadding(WindowInsets.safeDrawing)
-                .padding(horizontal = 14.dp, vertical = 12.dp)
+                .padding(horizontal = 14.dp)
+                .padding(top = 12.dp, bottom = 10.dp)
         ) {
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text("Benvenuto, ", color = Color.White, fontSize = 23.sp, fontWeight = FontWeight.Bold)
-                        Text("Li.v.a.s.", color = Color(0xFFE01B24), fontSize = 23.sp, fontWeight = FontWeight.Black)
-                    }
-                    Text(
-                        "Sempre pronti, sempre al servizio della comunità.",
-                        color = Color.White.copy(alpha = .56f),
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Medium
-                    )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("Benvenuto,", color = Color.White, fontSize = 23.sp, fontWeight = FontWeight.Bold)
+                    Spacer(Modifier.width(4.dp))
+                    Text("Li.v.a.s.", color = Color.Red, fontSize = 23.sp, fontWeight = FontWeight.Black)
                 }
             }
+            Text(
+                "Sempre pronti, sempre al servizio della comunità.",
+                color = Color.White.copy(alpha = .56f),
+                fontSize = 11.5.sp,
+                fontWeight = FontWeight.Medium
+            )
 
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(7.dp))
             Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                 Image(
                     painter = painterResource(R.drawable.livas_3d_logo),
                     contentDescription = "Logo Lì.v.a.s.",
-                    modifier = Modifier.size(285.dp)
+                    modifier = Modifier
+                        .size(325.dp)
+                        .shadow(18.dp, CircleShape)
                 )
             }
-            Spacer(Modifier.height(6.dp))
 
             LazyVerticalGrid(
                 columns = GridCells.Fixed(4),
                 modifier = Modifier.weight(1f),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp),
-                contentPadding = PaddingValues(bottom = 8.dp)
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                contentPadding = PaddingValues(bottom = 10.dp)
             ) {
                 items(tiles) { tile ->
                     MockupAccessTileAndroid(tile) {
@@ -124,16 +131,16 @@ fun AccessHomeScreen(
             Surface(
                 color = Color.White.copy(alpha = .035f),
                 shape = RoundedCornerShape(16.dp),
-                border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = .07f)),
+                border = BorderStroke(1.dp, Color.White.copy(alpha = .07f)),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(Modifier.padding(13.dp), verticalArrangement = Arrangement.spacedBy(7.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.GridView, null, tint = Color(0xFFE01B24), modifier = Modifier.size(15.dp))
+                        Icon(Icons.Default.GridView, null, tint = Color.Red, modifier = Modifier.size(15.dp))
                         Spacer(Modifier.width(6.dp))
-                        Text("ACCESSO RAPIDO", color = Color(0xFFE01B24), fontSize = 11.sp, fontWeight = FontWeight.Black)
+                        Text("ACCESSO RAPIDO", color = Color.Red, fontSize = 11.sp, fontWeight = FontWeight.Black)
                         Spacer(Modifier.weight(1f))
-                        Text("Beta 2.4.4", color = Color.White.copy(alpha = .40f), fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                        Text("Beta 2.4.6", color = Color.White.copy(alpha = .40f), fontSize = 10.sp, fontWeight = FontWeight.Bold)
                     }
                     Text(
                         "Le aree riservate richiedono autenticazione. Le funzioni disponibili dipendono dal ruolo.",
@@ -148,44 +155,69 @@ fun AccessHomeScreen(
 
 @Composable
 private fun MockupAccessTileAndroid(tile: AppleAccessTile, onClick: () -> Unit) {
-    Surface(
+    val shape = RoundedCornerShape(18.dp)
+    Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(94.dp)
-            .shadow(7.dp, RoundedCornerShape(16.dp))
-            .clickable(onClick = onClick),
-        shape = RoundedCornerShape(16.dp),
-        color = Color(0xFF171719),
-        border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = .09f))
+            .heightIn(min = 116.dp)
+            .shadow(9.dp, shape)
+            .background(
+                Brush.linearGradient(listOf(Color(0xFF161618), Color(0xFF030304))),
+                shape
+            )
+            .clickable(onClick = onClick)
+            .then(
+                Modifier.background(Color.Transparent, shape)
+            )
     ) {
+        // bordo rosso sfumato della tile Apple
+        Surface(
+            modifier = Modifier.matchParentSize(),
+            color = Color.Transparent,
+            shape = shape,
+            border = BorderStroke(
+                1.25.dp,
+                Brush.linearGradient(listOf(Color(0xFFFF382B), Color(0xFF8F0005)))
+            )
+        ) {}
+
         Column(
-            Modifier.fillMaxSize().padding(horizontal = 5.dp, vertical = 9.dp),
+            Modifier.fillMaxSize().padding(horizontal = 6.dp, vertical = 10.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Box(
-                modifier = Modifier
-                    .size(34.dp)
-                    .background(Color(0xFFE01B24).copy(alpha = .14f), RoundedCornerShape(11.dp)),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(tile.icon, null, tint = Color(0xFFE01B24), modifier = Modifier.size(20.dp))
+            Box(Modifier.height(45.dp).fillMaxWidth(), contentAlignment = Alignment.Center) {
+                // doppio livello: ombra scura + icona rossa, come il simbolo 3D della Build Apple 31
+                Icon(
+                    tile.icon,
+                    null,
+                    tint = Color(0xFF4D0004),
+                    modifier = Modifier.size(34.dp).offset(x = 2.dp, y = 4.dp)
+                )
+                Icon(
+                    tile.icon,
+                    null,
+                    tint = Color(0xFFF20A0A),
+                    modifier = Modifier.size(34.dp)
+                )
             }
-            Spacer(Modifier.height(6.dp))
+            Spacer(Modifier.height(7.dp))
             Text(
                 tile.title,
                 color = Color.White,
-                fontSize = if (tile.title.length > 13) 8.sp else 9.sp,
-                lineHeight = 10.sp,
+                fontSize = 10.5.sp,
+                lineHeight = 11.5.sp,
                 fontWeight = FontWeight.Black,
                 textAlign = TextAlign.Center,
                 maxLines = 2
             )
+            Spacer(Modifier.height(2.dp))
             Text(
                 tile.subtitle,
-                color = Color.White.copy(alpha = .43f),
-                fontSize = 7.5.sp,
-                lineHeight = 9.sp,
+                color = Color.White.copy(alpha = .55f),
+                fontSize = 8.5.sp,
+                lineHeight = 9.5.sp,
+                fontWeight = FontWeight.Medium,
                 textAlign = TextAlign.Center,
                 maxLines = 2
             )

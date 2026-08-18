@@ -87,7 +87,7 @@ private fun ProtectedAreaShell(area: AccessArea, onLoggedOut: () -> Unit) {
             }
         },
         bottomBar = {
-            NavigationBar(containerColor = Color.White, tonalElevation = 4.dp) {
+            NavigationBar(containerColor = LivasBackgroundDeep, tonalElevation = 0.dp) {
                 tabs.forEach { t ->
                     NavigationBarItem(
                         selected = tab == t.id && detail == null,
@@ -95,7 +95,7 @@ private fun ProtectedAreaShell(area: AccessArea, onLoggedOut: () -> Unit) {
                         colors = NavigationBarItemDefaults.colors(
                             selectedIconColor = LivasNavy,
                             selectedTextColor = LivasNavy,
-                            indicatorColor = Color(0xFFEAF2FF),
+                            indicatorColor = LivasRed.copy(alpha = 0.16f),
                             unselectedIconColor = LivasMuted,
                             unselectedTextColor = LivasMuted
                         ),
