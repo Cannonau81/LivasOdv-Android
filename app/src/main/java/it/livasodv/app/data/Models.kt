@@ -191,6 +191,28 @@ data class CitizenRequest(
 )
 
 @Serializable
+data class CitizenRequestInsert(
+    val id: String,
+    @SerialName("request_type") val requestType: String,
+    @SerialName("first_name") val firstName: String,
+    @SerialName("last_name") val lastName: String,
+    val phone: String,
+    val email: String?,
+    val address: String?,
+    @SerialName("from_place") val fromPlace: String?,
+    @SerialName("to_place") val toPlace: String?,
+    @SerialName("requested_at") val requestedAt: String?,
+    val mobility: String?,
+    val stairs: String?,
+    val equipment: String?,
+    val notes: String?,
+    @SerialName("privacy_accepted") val privacyAccepted: Boolean,
+    val status: String,
+    @SerialName("assigned_vehicle_id") val assignedVehicleId: String?,
+    @SerialName("is_read") val isRead: Boolean
+)
+
+@Serializable
 data class CivilVolunteer(
     val id: String,
     @SerialName("first_name") val firstName: String,

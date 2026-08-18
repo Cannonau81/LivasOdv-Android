@@ -240,7 +240,31 @@ class AppRepository {
     }
 
     suspend fun submitCitizenRequest(value: CitizenRequest): Result<Unit> = runCatching {
-        client.from("citizen_requests").insert(value)
+        // Usa un DTO senza valori di default: privacy_accepted/status/is_read devono essere
+        // inviati esplicitamente, altrimenti kotlinx.serialization può ometterli e la RLS
+        // del backend rifiuta correttamente la richiesta pubblica.
+        client.from("citizen_requests").insert(
+            CitizenRequestInsert(
+                id = value.id,
+                requestType = value.requestType,
+                firstName = value.firstName,
+                lastName = value.lastName,
+                phone = value.phone,
+                email = value.email,
+                address = value.address,
+                fromPlace = value.fromPlace,
+                toPlace = value.toPlace,
+                requestedAt = value.requestedAt,
+                mobility = value.mobility,
+                stairs = value.stairs,
+                equipment = value.equipment,
+                notes = value.notes,
+                privacyAccepted = value.privacyAccepted,
+                status = value.status,
+                assignedVehicleId = value.assignedVehicleId,
+                isRead = value.isRead
+            )
+        )
     }
 
     suspend fun updateRequestStatus(id: String, status: String) = mutate {

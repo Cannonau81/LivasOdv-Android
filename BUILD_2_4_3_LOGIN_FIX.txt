@@ -1,0 +1,8 @@
+LivasODV Android 2.4.3
+
+- Login Android allineato all'esperienza iPhone: Nome utente + Password.
+- Le email tecniche Supabase non vengono mostrate all'utente.
+- Mapping attivo: admin -> account Direttivo; socio -> account Soci; servizisociali predisposto per l'area dedicata.
+- Recupero password tramite nickname, usando internamente l'email associata.
+- Correzione richieste cittadini: privacy_accepted, status e is_read vengono inviati esplicitamente a Supabase per rispettare la policy RLS.
+- Mantiene i fix di compilazione/lint della 2.4.2.

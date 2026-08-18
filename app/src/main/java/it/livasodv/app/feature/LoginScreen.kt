@@ -21,8 +21,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.unit.dp
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.providers.builtin.Email
@@ -40,9 +38,30 @@ fun roleAllowsArea(role: AppRole, area: AccessArea): Boolean = when (area) {
     AccessArea.SERVIZIO_CIVILE -> role == AppRole.SERVIZIO_CIVILE || role == AppRole.OLP || role == AppRole.DIRETTIVO
 }
 
+private fun loginEmailFor(area: AccessArea, username: String): String? {
+    val clean = username.trim().lowercase()
+    return when (area) {
+        AccessArea.DIRETTIVO -> if (clean == "admin") "livas.gonnos@tiscali.it" else null
+        AccessArea.SOCI -> if (clean == "socio") "sannav@libero.it" else null
+        AccessArea.SERVIZI_SOCIALI -> if (clean == "servizisociali") "servizisociali@livas.invalid" else null
+        // Queste aree non sono ancora esposte nella home pubblica Android.
+        // Quando avranno un account server dedicato verranno mappate qui senza mostrare email all'utente.
+        AccessArea.MAGAZZINO, AccessArea.OLP, AccessArea.SERVIZIO_CIVILE -> null
+    }
+}
+
+private fun usernameHintFor(area: AccessArea): String = when (area) {
+    AccessArea.DIRETTIVO -> "Nome utente amministratore"
+    AccessArea.SOCI -> "Nome utente socio"
+    AccessArea.MAGAZZINO -> "Nome utente magazzino"
+    AccessArea.SERVIZI_SOCIALI -> "Nome utente Servizi Sociali"
+    AccessArea.OLP -> "Nome utente OLP"
+    AccessArea.SERVIZIO_CIVILE -> "Nome utente operatore"
+}
+
 @Composable
 fun LoginScreen(area: AccessArea, onBack: () -> Unit, onSuccess: () -> Unit) {
-    var email by remember { mutableStateOf("") }
+    var username by remember { mutableStateOf("") }
     var pass by remember { mutableStateOf("") }
     var loading by remember { mutableStateOf(false) }
     var showPassword by remember { mutableStateOf(false) }
@@ -75,7 +94,13 @@ fun LoginScreen(area: AccessArea, onBack: () -> Unit, onSuccess: () -> Unit) {
                         Spacer(Modifier.width(8.dp))
                         Text("Area protetta", fontWeight = FontWeight.Bold)
                     }
-                    OutlinedTextField(email, { email = it.trim() }, label = { Text("Email") }, singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email), modifier = Modifier.fillMaxWidth())
+                    OutlinedTextField(
+                        username,
+                        { username = it },
+                        label = { Text(usernameHintFor(area)) },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
                     OutlinedTextField(
                         pass, { pass = it },
                         label = { Text("Password") },
@@ -91,10 +116,13 @@ fun LoginScreen(area: AccessArea, onBack: () -> Unit, onSuccess: () -> Unit) {
                     error?.let { Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall) }
                     TextButton(
                         onClick = {
-                            if (email.isBlank()) { error = "Inserisci prima l'indirizzo email." } else scope.launch {
+                            val serverEmail = loginEmailFor(area, username)
+                            if (serverEmail == null) {
+                                error = "Nome utente non riconosciuto per questa area."
+                            } else scope.launch {
                                 loading = true; error = null
-                                runCatching { SupabaseProvider.client.auth.resetPasswordForEmail(email) }
-                                    .onSuccess { error = "Email di recupero inviata. Controlla la posta e segui il link ricevuto." }
+                                runCatching { SupabaseProvider.client.auth.resetPasswordForEmail(serverEmail) }
+                                    .onSuccess { error = "Richiesta di recupero inviata all'indirizzo associato a questo account." }
                                     .onFailure { error = "Recupero password non riuscito: ${it.message ?: "errore server"}" }
                                 loading = false
                             }
@@ -108,7 +136,9 @@ fun LoginScreen(area: AccessArea, onBack: () -> Unit, onSuccess: () -> Unit) {
                                 loading = true
                                 error = null
                                 try {
-                                    SupabaseProvider.client.auth.signInWith(Email) { this.email = email; this.password = pass }
+                                    val serverEmail = loginEmailFor(area, username)
+                                        ?: throw IllegalArgumentException("Nome utente o password non corretti.")
+                                    SupabaseProvider.client.auth.signInWith(Email) { this.email = serverEmail; this.password = pass }
                                     val result = AppGraph.repo.bootstrap()
                                     if (result.isFailure) {
                                         error = AppGraph.repo.error.value ?: "Accesso non autorizzato"
@@ -119,13 +149,17 @@ fun LoginScreen(area: AccessArea, onBack: () -> Unit, onSuccess: () -> Unit) {
                                         onSuccess()
                                     }
                                 } catch (e: Exception) {
-                                    error = "Accesso non riuscito: ${e.message ?: "controlla credenziali e connessione"}"
+                                    error = if (e is IllegalArgumentException) {
+                                        "Nome utente o password non corretti."
+                                    } else {
+                                        "Accesso non riuscito: ${e.message ?: "controlla credenziali e connessione"}"
+                                    }
                                 } finally {
                                     loading = false
                                 }
                             }
                         },
-                        enabled = !loading && email.isNotBlank() && pass.isNotBlank(),
+                        enabled = !loading && username.isNotBlank() && pass.isNotBlank(),
                         modifier = Modifier.fillMaxWidth().height(50.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = LivasNavy)
                     ) { Text(if (loading) "ACCESSO…" else "ACCEDI", fontWeight = FontWeight.Bold) }
