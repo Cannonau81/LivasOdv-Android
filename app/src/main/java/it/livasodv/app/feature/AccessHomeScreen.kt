@@ -5,6 +5,7 @@ package it.livasodv.app.feature
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -19,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -107,6 +109,8 @@ fun AccessHomeScreen(
                     modifier = Modifier
                         .size(325.dp)
                         .shadow(18.dp, CircleShape)
+                        .clip(CircleShape)
+                        .border(1.2.dp, Brush.linearGradient(listOf(Color.Red.copy(alpha = .72f), Color(0xFFFF9500).copy(alpha = .22f), Color.Transparent)), CircleShape)
                 )
             }
 
@@ -140,7 +144,7 @@ fun AccessHomeScreen(
                         Spacer(Modifier.width(6.dp))
                         Text("ACCESSO RAPIDO", color = Color.Red, fontSize = 11.sp, fontWeight = FontWeight.Black)
                         Spacer(Modifier.weight(1f))
-                        Text("Beta 2.4.6", color = Color.White.copy(alpha = .40f), fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                        Text("Beta 2.4.9", color = Color.White.copy(alpha = .40f), fontSize = 10.sp, fontWeight = FontWeight.Bold)
                     }
                     Text(
                         "Le aree riservate richiedono autenticazione. Le funzioni disponibili dipendono dal ruolo.",

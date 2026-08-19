@@ -90,3 +90,24 @@ fun StatusPill(text: String, active: Boolean = true) {
         Text(text, color = if (active) LivasGreen else LivasRed, fontWeight = FontWeight.SemiBold, style = MaterialTheme.typography.labelSmall, modifier = Modifier.padding(horizontal = 9.dp, vertical = 4.dp))
     }
 }
+
+
+@Composable
+fun ProfessionalHeaderAndroid(
+    title: String,
+    subtitle: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    modifier: Modifier = Modifier
+) {
+    Row(modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+        Surface(shape = RoundedCornerShape(13.dp), color = LivasAccent, modifier = Modifier.size(46.dp)) {
+            Box(contentAlignment = Alignment.Center) {
+                Icon(icon, null, tint = Color.White, modifier = Modifier.size(24.dp))
+            }
+        }
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+            Text(title, color = Color.White, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+            Text(subtitle, color = Color.White.copy(alpha = .58f), style = MaterialTheme.typography.bodyMedium)
+        }
+    }
+}

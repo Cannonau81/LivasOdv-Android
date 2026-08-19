@@ -152,19 +152,10 @@ fun LoginScreen(area: AccessArea, onBack: () -> Unit, onSuccess: () -> Unit) {
                     error?.let { Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall) }
                     TextButton(
                         onClick = {
-                            if (area != AccessArea.SERVIZI_SOCIALI) {
-                                error = "La password di questa area è gestita dall'associazione. Contatta il Direttivo per il ripristino."
+                            error = if (area == AccessArea.SERVIZI_SOCIALI) {
+                                "Per il ripristino delle credenziali Servizi Sociali contatta il Direttivo. Il recupero automatico è disattivato per evitare richieste incomplete."
                             } else {
-                                val serverEmail = loginEmailFor(area, username)
-                                if (serverEmail == null) {
-                                    error = "Nome utente non riconosciuto per questa area."
-                                } else scope.launch {
-                                    loading = true; error = null
-                                    runCatching { SupabaseProvider.client.auth.resetPasswordForEmail(serverEmail) }
-                                        .onSuccess { error = "Richiesta di recupero inviata all'indirizzo associato a questo account." }
-                                        .onFailure { error = "Recupero password non riuscito. Riprova più tardi." }
-                                    loading = false
-                                }
+                                "La password di questa area è gestita dall'associazione. Contatta il Direttivo per il ripristino."
                             }
                         },
                         enabled = !loading,

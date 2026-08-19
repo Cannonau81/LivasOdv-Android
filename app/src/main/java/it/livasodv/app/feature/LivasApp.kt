@@ -17,6 +17,9 @@ import it.livasodv.app.data.AppRole
 import it.livasodv.app.ui.theme.*
 import it.livasodv.app.data.AppGraph
 import kotlinx.coroutines.launch
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 
 data class ShellTab(val id: String, val label: String, val icon: ImageVector)
 
@@ -26,6 +29,30 @@ fun LivasApp() {
     var activeArea by remember { mutableStateOf<AccessArea?>(null) }
     var citizen by remember { mutableStateOf(false) }
     var publicTool by remember { mutableStateOf<String?>(null) }
+    var backgroundAt by remember { mutableStateOf<Long?>(null) }
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    DisposableEffect(lifecycleOwner, activeArea) {
+        val observer = LifecycleEventObserver { _, event ->
+            when (event) {
+                Lifecycle.Event.ON_STOP -> if (activeArea != null) backgroundAt = System.currentTimeMillis()
+                Lifecycle.Event.ON_START -> {
+                    val elapsed = backgroundAt?.let { System.currentTimeMillis() - it } ?: 0L
+                    backgroundAt = null
+                    if (activeArea != null && elapsed >= 180_000L) {
+                        kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.Main).launch {
+                            runCatching { AppGraph.repo.signOut() }
+                            activeArea = null
+                            loginArea = null
+                        }
+                    }
+                }
+                else -> Unit
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
 
     when {
         publicTool != null -> PublicToolScreen(publicTool!!) { publicTool = null }

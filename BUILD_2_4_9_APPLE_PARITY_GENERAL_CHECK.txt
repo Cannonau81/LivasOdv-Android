@@ -1,0 +1,11 @@
+LivasODV Android 2.4.9
+
+Controllo generale rispetto Apple Build 31:
+- palette esatta ProfessionalTheme.swift
+- asset logo ufficiale/3D identici
+- home 4 colonne e gradient Apple
+- login Servizi Sociali reale su Supabase
+- badge richieste cittadini
+- logout protetto dopo 180s in background
+- recovery automatico SS disattivato per timeout backend
+- CI Gradle 8.13 / JDK17 / Android 36
