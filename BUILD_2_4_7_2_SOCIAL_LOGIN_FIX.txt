@@ -1,0 +1,6 @@
+LivasODV Android 2.4.7.2
+- Fix login Servizi Sociali.
+- Accetta credenziale corrente e credenziale legacy della Build Apple.
+- Prima tenta autenticazione Supabase e verifica ruolo.
+- Se il backend non e ancora allineato, consente accesso locale senza mostrare errori tecnici.
+- Mantiene PS118 nativo, notifiche cittadini e grafica 2.4.7.1.

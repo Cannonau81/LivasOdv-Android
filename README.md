@@ -1,3 +1,13 @@
+# LivasODV Android 2.4.8
+
+Allineamento login Servizi Sociali e richieste cittadini.
+
+- nickname visibile: `servizisociali`
+- autenticazione server: account Supabase dedicato
+- ruolo richiesto: `servizi_sociali`
+- nessun fallback locale per Servizi Sociali
+- richieste cittadini caricate dal backend con badge e realtime già presenti nella base 2.4.7.x
+
 # Lì.v.a.s. O.d.V. — Android 2.4.0 RC1
 
 Release Candidate Android consolidata dopo audit completo della precedente serie 2.3.x.

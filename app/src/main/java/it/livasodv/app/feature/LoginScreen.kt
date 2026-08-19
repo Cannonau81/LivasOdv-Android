@@ -45,6 +45,8 @@ private object AppleLocalAccess {
     const val MAGAZZINO_HASH = "8a64994067e1a3cc1937e2bb1c242c1c7f6c9c90b38005d05af3542e0e8218e9"
     const val OLP_HASH = "d9154165ae84f24c5ead0ba62649e1b2fb8ab433c49751b94c40cc5a2de76804"
     const val APPLE_REVIEW_HASH = "03678646920bc7ccb61248ae63529e6b8bcf8e32944d5f2c5ec4bdbece387c20"
+    const val SERVIZI_SOCIALI_HASH = "41750d95d4467a1e0211299f1f46f965dc6794b80a7293cdbd639c69e64d7798"
+    const val SERVIZI_SOCIALI_LEGACY_HASH = "03678646920bc7ccb61248ae63529e6b8bcf8e32944d5f2c5ec4bdbece387c20"
 }
 
 private fun sha256(value: String): String = MessageDigest.getInstance("SHA-256")
@@ -69,14 +71,15 @@ private fun localRoleFor(area: AccessArea, username: String, password: String): 
         AccessArea.SOCI -> if (clean == "socio" && hash == AppleLocalAccess.SOCIO_HASH) AppRole.SOCIO else null
         AccessArea.MAGAZZINO -> if (clean == "magazzino" && hash == AppleLocalAccess.MAGAZZINO_HASH) AppRole.MAGAZZINO else null
         AccessArea.OLP -> if (clean == "olp" && hash == AppleLocalAccess.OLP_HASH) AppRole.OLP else null
-        AccessArea.SERVIZI_SOCIALI, AccessArea.SERVIZIO_CIVILE -> null
+        AccessArea.SERVIZI_SOCIALI -> if (clean == "servizisociali" && (hash == AppleLocalAccess.SERVIZI_SOCIALI_HASH || hash == AppleLocalAccess.SERVIZI_SOCIALI_LEGACY_HASH)) AppRole.SERVIZI_SOCIALI else null
+        AccessArea.SERVIZIO_CIVILE -> null
     }
 }
 
 private fun loginEmailFor(area: AccessArea, username: String): String? {
     val clean = username.trim().lowercase()
     return when (area) {
-        AccessArea.SERVIZI_SOCIALI -> if (clean == "servizisociali" || clean == "appletest") "servizisociali@livas.invalid" else null
+        AccessArea.SERVIZI_SOCIALI -> if (clean == "servizisociali" || clean == "appletest") "sannavalerio@gmail.com" else null
         AccessArea.DIRETTIVO -> if (clean == "admin") "livas.gonnos@tiscali.it" else null
         AccessArea.SOCI -> if (clean == "socio") "sannav@libero.it" else null
         else -> null
@@ -176,12 +179,22 @@ fun LoginScreen(area: AccessArea, onBack: () -> Unit, onSuccess: () -> Unit) {
                                     if (area == AccessArea.SERVIZI_SOCIALI) {
                                         val serverEmail = loginEmailFor(area, username)
                                             ?: throw IllegalArgumentException("Nome utente o password non corretti.")
-                                        SupabaseProvider.client.auth.signInWith(Email) { this.email = serverEmail; this.password = pass }
-                                        val result = AppGraph.repo.bootstrap()
-                                        if (result.isFailure || !roleAllowsArea(AppGraph.repo.role.value, area)) {
-                                            AppGraph.repo.signOut()
-                                            error = "Nome utente o password non corretti."
-                                        } else onSuccess()
+                                        // Servizi Sociali deve avere una sessione Supabase reale: niente fallback locale.
+                                        // Il nickname resta "servizisociali", ma l'identità tecnica è l'account Auth
+                                        // dedicato creato sul backend e già marcato con role=servizi_sociali.
+                                        if (localRoleFor(area, username, pass) == null) {
+                                            throw IllegalArgumentException("Nome utente o password non corretti.")
+                                        }
+                                        SupabaseProvider.client.auth.signInWith(Email) {
+                                            this.email = serverEmail
+                                            this.password = pass
+                                        }
+                                        AppGraph.repo.bootstrap().getOrThrow()
+                                        if (!roleAllowsArea(AppGraph.repo.role.value, area)) {
+                                            runCatching { AppGraph.repo.signOut() }
+                                            throw IllegalArgumentException("Account non autorizzato per Servizi Sociali.")
+                                        }
+                                        onSuccess()
                                     } else {
                                         val localRole = localRoleFor(area, username, pass)
                                             ?: throw IllegalArgumentException("Nome utente o password non corretti.")
