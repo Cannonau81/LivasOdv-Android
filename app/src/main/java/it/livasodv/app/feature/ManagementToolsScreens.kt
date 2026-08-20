@@ -2,6 +2,7 @@
 
 package it.livasodv.app.feature
 
+import it.livasodv.app.BuildConfig
 import android.content.Context
 import android.content.Intent
 import android.graphics.Paint
@@ -164,19 +165,28 @@ private data class ExpiryUi(val title: String, val subtitle: String, val date: L
 fun ExpiryCenterScreen(onBack: () -> Unit) {
     val repo = AppGraph.repo
     val vehicles by repo.vehicles.collectAsState(); val maintenance by repo.vehicleMaintenance.collectAsState()
+    val members by repo.members.collectAsState()
+    val certifications by LocalManagementStore.certifications.collectAsState()
     val today = LocalDate.now()
-    val entries = remember(vehicles, maintenance, today) {
+    val entries = remember(vehicles, maintenance, members, certifications, today) {
         buildList {
             vehicles.forEach { v ->
                 v.insuranceExpiry?.let { parseDate(it)?.let { d -> add(ExpiryUi("Assicurazione · ${v.name}", v.plate ?: "", d, expiryLevel(today,d))) } }
                 v.inspectionExpiry?.let { parseDate(it)?.let { d -> add(ExpiryUi("Revisione · ${v.name}", v.plate ?: "", d, expiryLevel(today,d))) } }
             }
             maintenance.forEach { m -> m.nextDueDate?.let { parseDate(it)?.let { d -> add(ExpiryUi("${m.workType} · ${vehicles.firstOrNull { it.id == m.vehicleId }?.name ?: "Mezzo"}", m.description ?: "", d, expiryLevel(today,d))) } } }
+            certifications.forEach { c ->
+                c.expiresAt?.let { parseDate(it)?.let { d ->
+                    val member = members.firstOrNull { it.id == c.memberId }
+                    val who = member?.let { "${it.firstName} ${it.lastName}" } ?: "Socio"
+                    add(ExpiryUi("${c.title} · $who", c.issuer.ifBlank { "Corso / abilitazione" }, d, expiryLevel(today,d)))
+                } }
+            }
         }.sortedBy { it.date }
     }
     Scaffold(topBar = { LivasTopAppBar(title = { Text("Scadenziario") }, navigationIcon = { IconButton(onBack) { Icon(Icons.Default.ArrowBack, null) } }) }) { p ->
         LazyColumn(Modifier.padding(p), contentPadding = PaddingValues(14.dp)) {
-            if(entries.isEmpty()) item { EmptyToolState("Nessuna scadenza", "Inserisci assicurazione, revisione o prossima manutenzione nei mezzi.", Icons.Default.EventAvailable) }
+            if(entries.isEmpty()) item { EmptyToolState("Nessuna scadenza", "Inserisci assicurazioni, revisioni, manutenzioni o scadenze dei corsi/abilitazioni soci.", Icons.Default.EventAvailable) }
             val groups = listOf("Scadute / entro 7 giorni" to entries.filter { it.level <= 1 }, "Entro 30 giorni" to entries.filter { it.level == 2 }, "Successive" to entries.filter { it.level == 3 })
             groups.forEach { (title, list) -> if(list.isNotEmpty()) { item { Text(title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, modifier = Modifier.padding(vertical = 10.dp)) }; items(list) { e -> ListItem(headlineContent = { Text(e.title, fontWeight = FontWeight.Bold) }, supportingContent = { Text(e.subtitle) }, trailingContent = { Text(e.date.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")), fontWeight = FontWeight.SemiBold) }, leadingContent = { Icon(if(e.level==0) Icons.Default.Error else Icons.Default.Event, null) }); HorizontalDivider() } } }
         }
@@ -209,7 +219,7 @@ fun AppInfoScreen(onBack: () -> Unit) {
     Scaffold(topBar = { LivasTopAppBar(title = { Text("Informazioni") }, navigationIcon = { IconButton(onBack) { Icon(Icons.Default.ArrowBack, null) } }) }) { p ->
         LazyColumn(Modifier.padding(p), contentPadding = PaddingValues(18.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             item { ListItem(headlineContent = { Text("Lì.v.a.s. O.D.V.") }, supportingContent = { Text("Gonnosfanadiga") }, leadingContent = { Icon(Icons.Default.Info, null) }) }
-            item { ListItem(headlineContent = { Text("Versione Android") }, supportingContent = { Text("2.1.0 · Parità iPhone / GitHub") }) }
+            item { ListItem(headlineContent = { Text("Versione Android") }, supportingContent = { Text("${BuildConfig.VERSION_NAME} · Beta soci · parità iPhone Build 31") }) }
             item { ListItem(headlineContent = { Text("Backend") }, supportingContent = { Text("Supabase condiviso iPhone ↔ Android") }) }
             item { ListItem(headlineContent = { Text("Privacy") }, supportingContent = { Text("Accesso e dati protetti tramite autenticazione e policy RLS") }) }
             item { Text("Supporto: livas.gonnos@tiscali.it · 070 9798990") }

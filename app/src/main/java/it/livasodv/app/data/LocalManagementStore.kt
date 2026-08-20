@@ -7,6 +7,8 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 import java.time.OffsetDateTime
+import java.time.LocalDate
+import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 @Serializable
@@ -148,6 +150,38 @@ object LocalManagementStore {
     }
     fun deleteCertification(item: MemberCertificationRecord) {
         _certifications.value = _certifications.value.filterNot { it.id == item.id }; saveCertifications(); log("Soci", "Eliminazione corso", item.title)
+    }
+
+
+    /** Genera promemoria locali una sola volta per le scadenze entro 7 giorni. */
+    fun syncExpiryReminders(vehicles: List<Vehicle>, maintenance: List<VehicleMaintenance>, members: List<Member>) {
+        val today = LocalDate.now()
+        val reminders = buildList<Pair<String, String>> {
+            fun addIfNear(title: String, rawDate: String?, detail: String) {
+                val date = rawDate?.take(10)?.let { runCatching { LocalDate.parse(it) }.getOrNull() } ?: return
+                val days = ChronoUnit.DAYS.between(today, date)
+                if (days in 0..7) {
+                    val whenText = if (days == 0L) "scade oggi" else "scade tra $days giorni"
+                    add(title to "$detail · $whenText · ${date.dayOfMonth.toString().padStart(2,'0')}/${date.monthValue.toString().padStart(2,'0')}/${date.year}")
+                }
+            }
+            vehicles.forEach { v ->
+                addIfNear("Assicurazione in scadenza", v.insuranceExpiry, "${v.name}${v.plate?.let { " · $it" } ?: ""}")
+                addIfNear("Revisione in scadenza", v.inspectionExpiry, "${v.name}${v.plate?.let { " · $it" } ?: ""}")
+            }
+            maintenance.forEach { m ->
+                val vehicle = vehicles.firstOrNull { it.id == m.vehicleId }?.name ?: "Mezzo"
+                addIfNear("Manutenzione in scadenza", m.nextDueDate, "$vehicle · ${m.workType}")
+            }
+            _certifications.value.forEach { c ->
+                val member = members.firstOrNull { it.id == c.memberId }
+                val who = member?.let { "${it.firstName} ${it.lastName}" } ?: "Socio"
+                addIfNear("Abilitazione in scadenza", c.expiresAt, "$who · ${c.title}")
+            }
+        }
+        reminders.forEach { (title, body) ->
+            if (_notifications.value.none { it.title == title && it.body == body }) notify(title, body, "warning")
+        }
     }
 
     fun snapshot() = LocalBackupData(_presidi.value, _audit.value, _notifications.value, _missions.value, _trash.value, _certifications.value)

@@ -7,5 +7,8 @@
         <item name="android:navigationBarColor">#05070D</item>
         <item name="android:windowBackground">#05070D</item>
         <item name="android:colorAccent">#D11C14</item>
+        <item name="android:windowSplashScreenBackground">#000000</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/app_icon</item>
+        <item name="android:windowSplashScreenAnimationDuration">650</item>
     </style>
 </resources>

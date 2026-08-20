@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.dp
 import it.livasodv.app.data.AppRole
 import it.livasodv.app.ui.theme.*
 import it.livasodv.app.data.AppGraph
+import it.livasodv.app.data.LocalManagementStore
 import kotlinx.coroutines.launch
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -57,9 +58,17 @@ fun LivasApp() {
     when {
         publicTool != null -> PublicToolScreen(publicTool!!) { publicTool = null }
         citizen -> CitizenRootScreen { citizen = false }
-        activeArea != null -> ProtectedAreaShell(activeArea!!) {
-            activeArea = null
-            loginArea = null
+        activeArea != null -> BiometricProtectedArea(
+            areaName = activeArea!!.title,
+            onExit = {
+                activeArea = null
+                loginArea = null
+            }
+        ) {
+            ProtectedAreaShell(activeArea!!) {
+                activeArea = null
+                loginArea = null
+            }
         }
         loginArea != null -> LoginScreen(loginArea!!, onBack = { loginArea = null }) {
             activeArea = loginArea
@@ -80,6 +89,9 @@ private fun ProtectedAreaShell(area: AccessArea, onLoggedOut: () -> Unit) {
     val loading by repo.loading.collectAsState()
     val error by repo.error.collectAsState()
     val requests by repo.requests.collectAsState()
+    val vehicles by repo.vehicles.collectAsState()
+    val maintenance by repo.vehicleMaintenance.collectAsState()
+    val members by repo.members.collectAsState()
     val unreadRequests = requests.count { it.status.equals("nuova", true) || !it.isRead }
     val scope = rememberCoroutineScope()
     val effectiveArea = remember(area, role) {
@@ -101,6 +113,11 @@ private fun ProtectedAreaShell(area: AccessArea, onLoggedOut: () -> Unit) {
     val current = detail ?: tab
 
     LaunchedEffect(effectiveArea) { repo.observeRealtime() }
+    LaunchedEffect(vehicles, maintenance, members) {
+        if (effectiveArea == AccessArea.DIRETTIVO) {
+            LocalManagementStore.syncExpiryReminders(vehicles, maintenance, members)
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -127,8 +144,8 @@ private fun ProtectedAreaShell(area: AccessArea, onLoggedOut: () -> Unit) {
                 if (error != null || loading) {
                     Surface(tonalElevation = 2.dp) {
                         ListItem(
-                            headlineContent = { Text(if (loading) "Sincronizzazione server…" else error ?: "") },
-                            leadingContent = { if (loading) CircularProgressIndicator(strokeWidth = 2.dp) else Icon(Icons.Default.CloudOff, null) },
+                            headlineContent = { Text(if (loading) "Sincronizzazione server…" else "Server non disponibile · dati già caricati restano consultabili") },
+                            leadingContent = { if (loading) CircularProgressIndicator(strokeWidth = 2.dp) else Icon(Icons.Default.CloudOff, "Offline") },
                             trailingContent = if (error != null) { { IconButton({ repo.clearError() }) { Icon(Icons.Default.Close, "Chiudi") } } } else null
                         )
                     }

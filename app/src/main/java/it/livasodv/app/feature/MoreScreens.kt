@@ -37,8 +37,6 @@ fun MoreScreen(role: AppRole, onRoute: (String) -> Unit, onLogout: () -> Unit) {
             item { MoreRow("Turni", "Programmazione operativa") { onRoute("shifts") } }
             item { MoreRow("Vestizione e dotazioni", "Gestione vestiario soci") { onRoute("clothing") } }
             item { MoreRow("Server Li.v.a.s.", "Stato connessione e account") { onRoute("server") } }
-            item { MoreRow("Backup e Ripristino", "Esporta JSON completo e ripristina") { onRoute("backup") } }
-            item { MoreRow("Ricerca globale", "Archivio completo") { onRoute("search") } }
             item { MoreRow("Privacy", "Informativa privacy") { onRoute("privacy") } }
         }
         item { Spacer(Modifier.height(10.dp)) }

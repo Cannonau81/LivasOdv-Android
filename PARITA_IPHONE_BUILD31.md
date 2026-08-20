@@ -1,43 +1,42 @@
-# Parità iPhone Build 31 → Android
+# Parità iPhone Build 31 → Android 2.5.0 Beta Soci
 
-Questa tabella serve come controllo funzionale della build Android finale.
-
-| Area iPhone | Android | Backend / stato |
+| Area iPhone | Android 2.5.0 | Stato |
 |---|---|---|
-| Home accessi multipli | Sì | UI Android equivalente |
-| Login / recupero password | Sì | Supabase Auth |
-| Dashboard Direttivo | Sì | dati reali Supabase |
-| Soci | Sì | `members` |
-| Scheda socio | Sì | `members`, `member_clothing`, `shift_members`, `service_members` |
-| Qualifiche 118 / PC / AIB / Servizi Sociali | Sì | `members` (`__SERVIZI_SOCIALI__` come marker compatibile iOS) |
-| Corsi / abilitazioni socio | Sì | archivio locale, come iOS Build 31 |
-| Vestizione e dotazioni | Sì | `member_clothing` + magazzino |
-| Turni | Sì | `shifts`, `shift_members` |
-| Servizi | Sì | `services`, `service_members` |
-| Mezzi | Sì | `vehicles` |
-| Manutenzioni | Sì | `vehicle_maintenance` |
-| Km mensili | Sì | `vehicle_monthly_km` |
-| Magazzino | Sì | `warehouse_items`, `warehouse_movements` |
-| Presidi | Sì | archivio locale, come area gestionale separata |
-| Comunicazioni | Sì | `communications` |
-| Richieste cittadini | Sì | `citizen_requests` |
-| Servizio Civile | Sì | tabelle `civil_*` |
-| OLP approva/rifiuta | Sì | `civil_leave_requests` |
-| Calendario / ore SC | Sì | calcolo da turni/corsi |
+| Home accessi multipli | Sì | grafica/palette Apple |
+| Login per ruolo | Sì | locale + Supabase secondo area |
+| Protezione biometrica dopo login | Sì | biometria/credenziale dispositivo |
+| Logout dopo 3 min background | Sì | attivo |
+| Dashboard Direttivo | Sì | Supabase |
+| Soci / scheda socio | Sì | Supabase |
+| Qualifiche 118 / PC / AIB / SS | Sì | badge e vestizione |
+| Corsi / abilitazioni | Sì | locale + backup |
+| Scadenze corsi/abilitazioni | Sì | incluse nello scadenziario |
+| Turni | Sì | Supabase |
+| Servizi | Sì | Supabase |
+| Mezzi / manutenzioni / km | Sì | Supabase |
+| Magazzino / movimenti | Sì | Supabase |
+| Presidi | Sì | archivio locale separato |
+| Comunicazioni | Sì | Supabase |
+| Richieste cittadini | Sì | Supabase + badge non lette |
+| Servizi Sociali | Sì | account/ruolo Supabase reale |
+| Servizio Civile / OLP | Sì | tabelle civil_* |
 | Gestione 2.1 | Sì | strumenti Android |
-| Notifiche gestionali | Sì | archivio locale |
-| Registro attività | Sì | audit locale |
-| Operativo | Sì | archivio locale |
-| Cestino 30 giorni | Sì | locale + ripristino entità supportate |
-| Centro scadenze | Sì | dati mezzi/manutenzioni Supabase |
-| Report PDF | Sì | PDF generato e condivisibile |
-| Ricerca Direttivo | Sì | server + Presidi locali |
-| Backup / Ripristino | Sì | JSON server + dati locali |
-| Emergenze | Sì | chiamata telefonica |
-| Monitor PS 118 | Sì | fonte ufficiale via WebView |
-| Protezione Civile | Sì | Allerte/Meteo/Incendi/Cosa fare/Numeri |
-| Rescue Run | Sì | area passatempo |
+| Registro attività | Sì | locale |
+| Notifiche gestionali | Sì | locale |
+| Promemoria scadenze entro 7 gg | Sì | centro notifiche locale |
+| Cestino 30 giorni | Sì | locale + ripristino supportato |
+| Report PDF | Sì | generazione/condivisione |
+| Ricerca globale | Sì | solo Direttivo |
+| Backup / Ripristino | Sì | solo Direttivo |
+| Stato offline esplicito | Sì | mantiene dati già caricati |
+| Emergenze / Primo Soccorso | Sì | pubblico |
+| Monitor PS118 | Sì | UI nativa + fonte ufficiale |
+| Protezione Civile | Sì | fonti ufficiali e autoprotezione |
+| Rescue Run | Sì | locale |
 
-## Nota tecnica
-
-Alcune funzioni dell'iPhone Build 31 sono archiviate localmente nell'app iOS e non possiedono tabelle Supabase dedicate. Per non alterare il database di produzione, Android mantiene locali le corrispondenti aree (Presidi, audit, notifiche gestionali, Operativo e Cestino), includendole comunque nel backup completo.
+## Sicurezza beta
+- Nessuna `service_role` o chiave segreta server nel client.
+- `allowBackup=false` nel manifest.
+- HTTPS obbligatorio (`usesCleartextTraffic=false`).
+- Password non salvate in chiaro nel codice Android.
+- Autorizzazioni operative derivate dal ruolo server/RLS quando applicabile.

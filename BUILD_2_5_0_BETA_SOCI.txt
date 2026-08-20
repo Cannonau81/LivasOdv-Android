@@ -1,0 +1,5 @@
+LivasODV Android 2.5.0-beta.1 — Beta Soci
+versionCode 2500
+Riferimento grafico/funzionale: iPhone Build 31
+Workflow: .github/workflows/android-ci.yml
+Artifact atteso: LivasODV-Android-2.5.0-beta1-debug

@@ -12,8 +12,8 @@ android {
         applicationId = "it.livasodv.app"
         minSdk = 26
         targetSdk = 36
-        versionCode = 2490
-        versionName = "2.4.9"
+        versionCode = 2501
+        versionName = "2.5.0-beta.2"
         buildConfigField("String", "SUPABASE_URL", "\"https://bgntmdjbrhabydfoobhr.supabase.co\"")
         buildConfigField("String", "SUPABASE_PUBLISHABLE_KEY", "\"sb_publishable_xBAOXhBDIay3f1pfhOdWeg_MII_Jsta\"")
     }
@@ -32,6 +32,7 @@ kotlin {
 dependencies {
     implementation(platform("androidx.compose:compose-bom:2026.06.00"))
     implementation("androidx.activity:activity-compose:1.13.0")
+    implementation("androidx.biometric:biometric:1.1.0")
     implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.material:material-icons-extended")
     implementation("androidx.compose.ui:ui-tooling-preview")

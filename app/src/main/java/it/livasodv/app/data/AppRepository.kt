@@ -145,6 +145,7 @@ class AppRepository {
     suspend fun saveVehicleMaintenance(value: VehicleMaintenance) = mutate {
         client.from("vehicle_maintenance").upsert(value)
         _vehicleMaintenance.value = client.from("vehicle_maintenance").select().decodeList()
+        LocalManagementStore.log("Mezzi", "Manutenzione", value.workType)
     }
 
     suspend fun deleteVehicleMaintenance(id: String) = mutate {
@@ -155,6 +156,7 @@ class AppRepository {
     suspend fun saveVehicleMonthlyKm(value: VehicleMonthlyKm) = mutate {
         client.from("vehicle_monthly_km").upsert(value)
         _vehicleMonthlyKm.value = client.from("vehicle_monthly_km").select().decodeList()
+        LocalManagementStore.log("Mezzi", "Km mensili", "${value.month} · ${value.km} km")
     }
 
     suspend fun deleteVehicleMonthlyKm(id: String) = mutate {
@@ -165,6 +167,7 @@ class AppRepository {
     suspend fun saveShift(value: Shift) = mutate {
         client.from("shifts").upsert(value)
         _shifts.value = client.from("shifts").select().decodeList()
+        LocalManagementStore.log("Turni", "Salvataggio", "${value.shiftDate} · ${value.area}")
     }
 
     suspend fun deleteShift(id: String) = mutate {
@@ -185,6 +188,7 @@ class AppRepository {
     suspend fun saveService(value: Service) = mutate {
         client.from("services").upsert(value)
         _services.value = client.from("services").select().decodeList()
+        LocalManagementStore.log("Servizi", "Salvataggio", value.title)
     }
 
     suspend fun deleteService(id: String) = mutate {
@@ -209,6 +213,7 @@ class AppRepository {
     suspend fun saveWarehouse(value: WarehouseItem) = mutate {
         client.from("warehouse_items").upsert(value)
         _warehouse.value = client.from("warehouse_items").select().decodeList()
+        LocalManagementStore.log("Magazzino", "Salvataggio", value.name)
     }
 
     suspend fun deleteWarehouse(id: String) = mutate {
@@ -229,11 +234,13 @@ class AppRepository {
         )
         _warehouse.value = client.from("warehouse_items").select().decodeList()
         _warehouseMovements.value = client.from("warehouse_movements").select().decodeList()
+        LocalManagementStore.log("Magazzino", "Movimento", "${item.name} · $type · ${kotlin.math.abs(delta)}")
     }
 
     suspend fun saveCommunication(value: Communication) = mutate {
         client.from("communications").upsert(value)
         _communications.value = client.from("communications").select().decodeList()
+        LocalManagementStore.log("Comunicazioni", "Salvataggio", value.title)
     }
 
     suspend fun deleteCommunication(id: String) = mutate {

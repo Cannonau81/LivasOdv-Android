@@ -17,7 +17,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.draw.clip
@@ -70,6 +74,19 @@ fun AccessHomeScreen(
         AppleAccessTile("PROTEZIONE CIVILE", "Allerte meteo e incendi", Icons.Default.Shield, publicRoute = "civil_protection")
     )
 
+    val configuration = LocalConfiguration.current
+    val screenWidth = configuration.screenWidthDp
+    val gridColumns = when {
+        screenWidth >= 840 -> 5
+        screenWidth >= 600 -> 4
+        else -> 3
+    }
+    val logoSize = when {
+        screenWidth >= 840 -> 300.dp
+        screenWidth >= 600 -> 260.dp
+        else -> 220.dp
+    }
+
     Box(
         Modifier.fillMaxSize().background(
             Brush.verticalGradient(
@@ -107,7 +124,7 @@ fun AccessHomeScreen(
                     painter = painterResource(R.drawable.livas_3d_logo),
                     contentDescription = "Logo Lì.v.a.s.",
                     modifier = Modifier
-                        .size(325.dp)
+                        .size(logoSize)
                         .shadow(18.dp, CircleShape)
                         .clip(CircleShape)
                         .border(1.2.dp, Brush.linearGradient(listOf(Color.Red.copy(alpha = .72f), Color(0xFFFF9500).copy(alpha = .22f), Color.Transparent)), CircleShape)
@@ -115,7 +132,7 @@ fun AccessHomeScreen(
             }
 
             LazyVerticalGrid(
-                columns = GridCells.Fixed(4),
+                columns = GridCells.Fixed(gridColumns),
                 modifier = Modifier.weight(1f),
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -144,7 +161,7 @@ fun AccessHomeScreen(
                         Spacer(Modifier.width(6.dp))
                         Text("ACCESSO RAPIDO", color = Color.Red, fontSize = 11.sp, fontWeight = FontWeight.Black)
                         Spacer(Modifier.weight(1f))
-                        Text("Beta 2.4.9", color = Color.White.copy(alpha = .40f), fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                        Text("Beta 2.5.0 · Soci", color = Color.White.copy(alpha = .40f), fontSize = 10.sp, fontWeight = FontWeight.Bold)
                     }
                     Text(
                         "Le aree riservate richiedono autenticazione. Le funzioni disponibili dipendono dal ruolo.",
@@ -160,6 +177,7 @@ fun AccessHomeScreen(
 @Composable
 private fun MockupAccessTileAndroid(tile: AppleAccessTile, onClick: () -> Unit) {
     val shape = RoundedCornerShape(18.dp)
+    val haptics = LocalHapticFeedback.current
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -169,7 +187,10 @@ private fun MockupAccessTileAndroid(tile: AppleAccessTile, onClick: () -> Unit) 
                 Brush.linearGradient(listOf(Color(0xFF161618), Color(0xFF030304))),
                 shape
             )
-            .clickable(onClick = onClick)
+            .clickable {
+                haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                onClick()
+            }
             .then(
                 Modifier.background(Color.Transparent, shape)
             )
