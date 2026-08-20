@@ -165,7 +165,15 @@ data class Communication(
     val body: String,
     val urgent: Boolean = false,
     @SerialName("is_read") val isRead: Boolean = false,
-    @SerialName("created_by") val createdBy: String? = null
+    @SerialName("created_by") val createdBy: String? = null,
+    @SerialName("target_roles") val targetRoles: List<String> = listOf("admin", "direttivo", "socio", "magazzino", "olp", "servizio_civile", "servizi_sociali")
+)
+
+@Serializable
+data class CommunicationRead(
+    @SerialName("communication_id") val communicationId: String,
+    @SerialName("user_id") val userId: String,
+    @SerialName("read_at") val readAt: String? = null
 )
 
 @Serializable

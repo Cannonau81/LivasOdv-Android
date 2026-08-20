@@ -13,7 +13,7 @@ Candidata alla prima beta ufficiale Android per i soci.
 - feedback aptico sui pulsanti accesso rapido.
 
 ## Build CI attesa
-Artifact APK: `LivasODV-Android-2.5.0-beta3-debug`
+Artifact APK: `LivasODV-Android-2.5.0-beta4-debug`
 
 La pubblicazione beta va considerata pronta solo dopo run GitHub Actions verde e test installazione/login su dispositivo reale.
 

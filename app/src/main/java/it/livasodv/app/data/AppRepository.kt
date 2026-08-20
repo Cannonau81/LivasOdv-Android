@@ -34,6 +34,7 @@ class AppRepository {
     private val _warehouseMovements = MutableStateFlow<List<WarehouseMovement>>(emptyList()); val warehouseMovements = _warehouseMovements.asStateFlow()
     private val _requests = MutableStateFlow<List<CitizenRequest>>(emptyList()); val requests = _requests.asStateFlow()
     private val _communications = MutableStateFlow<List<Communication>>(emptyList()); val communications = _communications.asStateFlow()
+    private val _communicationReadIds = MutableStateFlow<Set<String>>(emptySet())
     private val _civilVolunteers = MutableStateFlow<List<CivilVolunteer>>(emptyList()); val civilVolunteers = _civilVolunteers.asStateFlow()
     private val _civilShifts = MutableStateFlow<List<CivilShift>>(emptyList()); val civilShifts = _civilShifts.asStateFlow()
     private val _civilShiftVolunteers = MutableStateFlow<List<CivilShiftVolunteer>>(emptyList()); val civilShiftVolunteers = _civilShiftVolunteers.asStateFlow()
@@ -79,7 +80,7 @@ class AppRepository {
         fetch("Assegnazioni turni") { _shiftMembers.value = client.from("shift_members").select().decodeList<ShiftMember>() }
         fetch("Servizi") { _services.value = client.from("services").select().decodeList<Service>() }
         fetch("Assegnazioni servizi") { _serviceMembers.value = client.from("service_members").select().decodeList<ServiceMember>() }
-        fetch("Comunicazioni") { _communications.value = client.from("communications").select().decodeList<Communication>() }
+        fetch("Comunicazioni") { refreshCommunications() }
 
         fetch("Vestizione") { _clothing.value = client.from("member_clothing").select().decodeList<MemberClothing>() }
         if (r == AppRole.DIRETTIVO || r == AppRole.MAGAZZINO) {
@@ -237,10 +238,30 @@ class AppRepository {
         LocalManagementStore.log("Magazzino", "Movimento", "${item.name} · $type · ${kotlin.math.abs(delta)}")
     }
 
+    private suspend fun refreshCommunications() {
+        val uid = currentUserId()
+        val reads = if (uid != null) {
+            runCatching {
+                client.from("communication_reads").select { filter { eq("user_id", uid) } }.decodeList<CommunicationRead>()
+                    .map { it.communicationId }.toSet()
+            }.getOrDefault(emptySet())
+        } else emptySet()
+        _communicationReadIds.value = reads
+        val rows = client.from("communications").select().decodeList<Communication>()
+        _communications.value = rows.map { it.copy(isRead = it.id in reads) }
+    }
+
     suspend fun saveCommunication(value: Communication) = mutate {
-        client.from("communications").upsert(value)
-        _communications.value = client.from("communications").select().decodeList()
+        client.from("communications").upsert(value.copy(isRead = false))
+        refreshCommunications()
         LocalManagementStore.log("Comunicazioni", "Salvataggio", value.title)
+    }
+
+    suspend fun markCommunicationRead(id: String) = mutate {
+        val uid = currentUserId() ?: return@mutate
+        client.from("communication_reads").upsert(CommunicationRead(id, uid))
+        _communicationReadIds.value = _communicationReadIds.value + id
+        _communications.value = _communications.value.map { if (it.id == id) it.copy(isRead = true) else it }
     }
 
     suspend fun deleteCommunication(id: String) = mutate {
@@ -248,7 +269,7 @@ class AppRepository {
             LocalManagementStore.addTrash(TrashRecord(kind = "communication", title = value.title, payload = LocalManagementStore.jsonCodec.encodeToString(value)))
         }
         client.from("communications").delete { filter { eq("id", id) } }
-        _communications.value = client.from("communications").select().decodeList()
+        refreshCommunications()
         LocalManagementStore.log("Comunicazioni", "Eliminazione", id)
     }
 
@@ -442,7 +463,25 @@ class AppRepository {
         launch { while (true) { delay(4_000); runCatching { _shiftMembers.value = client.from("shift_members").select().decodeList<ShiftMember>() } } }
         launch { runCatching { client.from("services").selectAsFlow(Service::id).collect { _services.value = it } } }
         launch { while (true) { delay(4_000); runCatching { _serviceMembers.value = client.from("service_members").select().decodeList<ServiceMember>() } } }
-        launch { runCatching { client.from("communications").selectAsFlow(Communication::id).collect { _communications.value = it } } }
+        launch {
+            runCatching {
+                client.from("communications").selectAsFlow(Communication::id).collect { rows ->
+                    val reads = _communicationReadIds.value
+                    _communications.value = rows.map { it.copy(isRead = it.id in reads) }
+                }
+            }
+        }
+        launch {
+            while (true) {
+                delay(4_000)
+                val uid = currentUserId() ?: continue
+                runCatching {
+                    val reads = client.from("communication_reads").select { filter { eq("user_id", uid) } }.decodeList<CommunicationRead>().map { it.communicationId }.toSet()
+                    _communicationReadIds.value = reads
+                    _communications.value = _communications.value.map { it.copy(isRead = it.id in reads) }
+                }
+            }
+        }
         launch { runCatching { client.from("member_clothing").selectAsFlow(MemberClothing::id).collect { _clothing.value = it } } }
         if (r == AppRole.DIRETTIVO || r == AppRole.MAGAZZINO) {
             launch { runCatching { client.from("warehouse_items").selectAsFlow(WarehouseItem::id).collect { _warehouse.value = it } } }

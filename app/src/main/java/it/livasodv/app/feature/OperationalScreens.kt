@@ -466,7 +466,10 @@ fun CommunicationsScreen(onBack: () -> Unit) {
         LazyColumn(Modifier.padding(p), contentPadding = PaddingValues(12.dp)) {
             if (list.isEmpty()) item { EmptyState("Nessuna comunicazione", "Gli avvisi pubblicati dal Direttivo compariranno qui.") }
             items(list.sortedByDescending { it.communicationDate }, key = { it.id }) { x ->
-                Card(Modifier.fillMaxWidth().padding(vertical = 4.dp).clickable(enabled = canEdit) { editing = x }) {
+                Card(Modifier.fillMaxWidth().padding(vertical = 4.dp).clickable {
+                    scope.launch { r.markCommunicationRead(x.id) }
+                    if (canEdit) editing = x
+                }) {
                     ListItem(
                         headlineContent = { Text(if (x.urgent) "⚠ ${x.title}" else x.title, fontWeight = FontWeight.Bold) },
                         supportingContent = { Text("${x.communicationDate}\n${x.body}") },
@@ -488,14 +491,31 @@ private fun CommunicationEditor(existing: Communication?, dismiss: () -> Unit, s
     var date by remember(existing) { mutableStateOf(existing?.communicationDate ?: java.time.OffsetDateTime.now().toString()) }
     var body by remember(existing) { mutableStateOf(existing?.body ?: "") }
     var urgent by remember(existing) { mutableStateOf(existing?.urgent ?: false) }
+    val initialRoles = existing?.targetRoles?.toSet() ?: setOf("admin", "direttivo", "socio", "magazzino", "olp", "servizio_civile", "servizi_sociali")
+    var roles by remember(existing) { mutableStateOf(initialRoles) }
+    fun roleToggle(role: String, checked: Boolean) { roles = if (checked) roles + role else roles - role }
     AlertDialog(onDismissRequest = dismiss, title = { Text(if (existing == null) "Nuova comunicazione" else "Modifica comunicazione") }, text = {
         LazyColumn(verticalArrangement = Arrangement.spacedBy(6.dp)) {
             item { OutlinedTextField(title, { title = it }, label = { Text("Titolo") }, modifier = Modifier.fillMaxWidth()) }
             item { OutlinedTextField(date, { date = it }, label = { Text("Data/ora ISO") }, modifier = Modifier.fillMaxWidth()) }
             item { OutlinedTextField(body, { body = it }, label = { Text("Testo") }, minLines = 4, modifier = Modifier.fillMaxWidth()) }
             item { ToggleLine("Urgente", urgent) { urgent = it } }
+            item { Text("Destinatari", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold) }
+            item { ToggleLine("Direttivo", roles.contains("direttivo") || roles.contains("admin")) { checked -> roleToggle("direttivo", checked); roleToggle("admin", checked) } }
+            item { ToggleLine("Soci", roles.contains("socio")) { roleToggle("socio", it) } }
+            item { ToggleLine("Magazzino", roles.contains("magazzino")) { roleToggle("magazzino", it) } }
+            item { ToggleLine("Servizi Sociali", roles.contains("servizi_sociali")) { roleToggle("servizi_sociali", it) } }
+            item { ToggleLine("OLP", roles.contains("olp")) { roleToggle("olp", it) } }
+            item { ToggleLine("Servizio Civile", roles.contains("servizio_civile")) { roleToggle("servizio_civile", it) } }
         }
-    }, confirmButton = { Button({ save(Communication(existing?.id ?: AppGraph.repo.newId(), date.trim(), title.trim(), body.trim(), urgent, existing?.isRead ?: false, existing?.createdBy ?: AppGraph.repo.currentUserId())) }, enabled = title.isNotBlank() && body.isNotBlank()) { Text("Salva") } }, dismissButton = { TextButton(dismiss) { Text("Annulla") } })
+    }, confirmButton = {
+        Button({
+            save(Communication(
+                existing?.id ?: AppGraph.repo.newId(), date.trim(), title.trim(), body.trim(), urgent, false,
+                existing?.createdBy ?: AppGraph.repo.currentUserId(), roles.toList().sorted()
+            ))
+        }, enabled = title.isNotBlank() && body.isNotBlank() && roles.isNotEmpty()) { Text("Salva") }
+    }, dismissButton = { TextButton(dismiss) { Text("Annulla") } })
 }
 
 @Composable
