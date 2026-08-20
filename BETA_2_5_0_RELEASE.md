@@ -1,4 +1,4 @@
-# Lì.v.a.s. O.D.V. Android — 2.5.0-beta.2
+# Lì.v.a.s. O.D.V. Android — 2.5.0-beta.3
 
 Candidata alla prima beta ufficiale Android per i soci.
 
@@ -13,6 +13,10 @@ Candidata alla prima beta ufficiale Android per i soci.
 - feedback aptico sui pulsanti accesso rapido.
 
 ## Build CI attesa
-Artifact APK: `LivasODV-Android-2.5.0-beta2-debug`
+Artifact APK: `LivasODV-Android-2.5.0-beta3-debug`
 
 La pubblicazione beta va considerata pronta solo dopo run GitHub Actions verde e test installazione/login su dispositivo reale.
+
+## Hotfix beta.3
+- Corretto Lint API 26/27: `android:windowLightNavigationBar` spostato in `values-v27/styles.xml`.
+- Compatibilità minima API 26 mantenuta.
